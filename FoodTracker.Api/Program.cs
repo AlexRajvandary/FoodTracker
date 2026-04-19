@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddFoodTrackerInfrastructure(builder.Configuration);
+builder.Services.AddFoodTrackerInfrastructure(builder.Configuration, builder.Environment);
 builder.Services.AddFoodTrackerApplication();
 builder.Services.AddFoodTrackerWebPresentation(builder.Configuration);
 builder.Services.AddFoodTrackerTelegram();
@@ -39,6 +39,8 @@ await using (var scope = app.Services.CreateAsyncScope())
             await roleManager.CreateAsync(new IdentityRole<Guid>(roleName)).ConfigureAwait(false);
         }
     }
+
+    await DatabaseInitializer.EnsureTestUserAsync(scope.ServiceProvider, app.Environment).ConfigureAwait(false);
 }
 
 app.MapControllers();

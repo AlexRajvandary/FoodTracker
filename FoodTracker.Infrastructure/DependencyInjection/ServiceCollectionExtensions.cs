@@ -9,14 +9,19 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace FoodTracker.Infrastructure.DependencyInjection;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddFoodTrackerInfrastructure(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddFoodTrackerInfrastructure(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        IHostEnvironment hostEnvironment)
     {
         ArgumentNullException.ThrowIfNull(configuration);
+        ArgumentNullException.ThrowIfNull(hostEnvironment);
         var connectionString = configuration.GetConnectionString("PostgreSql");
         if (string.IsNullOrWhiteSpace(connectionString))
         {
@@ -39,8 +44,17 @@ public static class ServiceCollectionExtensions
             .AddIdentityCore<ApplicationUser>(options =>
             {
                 options.Password.RequiredLength = 8;
-                options.Password.RequireDigit = true;
-                options.Password.RequireUppercase = true;
+                if (hostEnvironment.IsDevelopment())
+                {
+                    options.Password.RequireDigit = false;
+                    options.Password.RequireUppercase = false;
+                }
+                else
+                {
+                    options.Password.RequireDigit = true;
+                    options.Password.RequireUppercase = true;
+                }
+
                 options.Password.RequireLowercase = true;
                 options.Password.RequireNonAlphanumeric = false;
                 options.User.RequireUniqueEmail = true;
