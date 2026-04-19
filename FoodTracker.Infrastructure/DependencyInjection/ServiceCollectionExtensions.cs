@@ -32,6 +32,8 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<IFoodItemRepository, FoodItemRepository>();
         services.AddScoped<IFoodEntryRepository, FoodEntryRepository>();
+        services.AddScoped<IActivityTypeRepository, ActivityTypeRepository>();
+        services.AddScoped<IActivityEntryRepository, ActivityEntryRepository>();
 
         services
             .AddIdentityCore<ApplicationUser>(options =>

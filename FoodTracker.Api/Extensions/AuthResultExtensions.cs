@@ -1,4 +1,5 @@
 using FoodTracker.Application.Features.Auth;
+using FoodTracker.Application.Features.Activities;
 using FoodTracker.Application.Features.Nutrition;
 using FoodTracker.Domain.Common.Results;
 using Microsoft.AspNetCore.Mvc;
@@ -38,8 +39,10 @@ public static class AuthResultExtensions
             AuthErrorCodes.TelegramNotConfigured => new ObjectResult(body) { StatusCode = StatusCodes.Status503ServiceUnavailable },
             AuthErrorCodes.NotFound => new NotFoundObjectResult(body),
             FoodErrorCodes.FoodItemNotFound or FoodErrorCodes.EntryNotFound => new NotFoundObjectResult(body),
+            ActivityErrorCodes.ActivityTypeNotFound or ActivityErrorCodes.EntryNotFound => new NotFoundObjectResult(body),
             FoodErrorCodes.InvalidAmount or FoodErrorCodes.InvalidPatch or FoodErrorCodes.InvalidCategory =>
                 new BadRequestObjectResult(body),
+            ActivityErrorCodes.InvalidBurn or ActivityErrorCodes.InvalidPatch => new BadRequestObjectResult(body),
             _ => new BadRequestObjectResult(body),
         };
     }

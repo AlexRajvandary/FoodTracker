@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using FoodTracker.Api.Contracts;
 using FoodTracker.Api.Extensions;
+using FoodTracker.Application.Features.Activities;
 using FoodTracker.Application.Features.Nutrition;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -104,6 +105,95 @@ public class NutritionController : ControllerBase
 
         var result = await _mediator
             .Send(new DeleteFoodEntryCommand { UserId = userId, EntryId = id }, cancellationToken)
+            .ConfigureAwait(false);
+        return result.ToAuthActionResult(() => new NoContentResult());
+    }
+
+    [HttpGet("activity-entries")]
+    public async Task<IActionResult> ListActivityEntries(
+        [FromQuery] DateTime? from,
+        [FromQuery] DateTime? to,
+        [FromQuery] DateOnly? date,
+        CancellationToken cancellationToken)
+    {
+        if (!TryGetUserId(out var userId))
+        {
+            return Unauthorized();
+        }
+
+        var result = await _mediator
+            .Send(
+                new ListActivityEntriesQuery
+                {
+                    UserId = userId,
+                    FromUtc = NormalizeQueryDate(from),
+                    ToUtc = NormalizeQueryDate(to),
+                    Date = date,
+                },
+                cancellationToken)
+            .ConfigureAwait(false);
+        return result.ToAuthActionResult();
+    }
+
+    [HttpPost("activity-entries")]
+    public async Task<IActionResult> CreateActivityEntry(
+        [FromBody] CreateActivityEntryRequest body,
+        CancellationToken cancellationToken)
+    {
+        if (!TryGetUserId(out var userId))
+        {
+            return Unauthorized();
+        }
+
+        var command = new CreateActivityEntryCommand
+        {
+            UserId = userId,
+            ActivityTypeId = body.ActivityTypeId,
+            OccurredAt = body.OccurredAt,
+            DurationMinutes = body.DurationMinutes,
+            RepetitionsCount = body.RepetitionsCount,
+            CaloriesBurned = body.CaloriesBurned,
+        };
+
+        var result = await _mediator.Send(command, cancellationToken).ConfigureAwait(false);
+        return result.ToAuthActionResult(dto => new ObjectResult(dto) { StatusCode = StatusCodes.Status201Created });
+    }
+
+    [HttpPatch("activity-entries/{id:guid}")]
+    public async Task<IActionResult> UpdateActivityEntry(
+        [FromRoute] Guid id,
+        [FromBody] UpdateActivityEntryRequest body,
+        CancellationToken cancellationToken)
+    {
+        if (!TryGetUserId(out var userId))
+        {
+            return Unauthorized();
+        }
+
+        var command = new UpdateActivityEntryCommand
+        {
+            UserId = userId,
+            EntryId = id,
+            OccurredAt = body.OccurredAt,
+            DurationMinutes = body.DurationMinutes,
+            RepetitionsCount = body.RepetitionsCount,
+            CaloriesBurned = body.CaloriesBurned,
+        };
+
+        var result = await _mediator.Send(command, cancellationToken).ConfigureAwait(false);
+        return result.ToAuthActionResult();
+    }
+
+    [HttpDelete("activity-entries/{id:guid}")]
+    public async Task<IActionResult> DeleteActivityEntry([FromRoute] Guid id, CancellationToken cancellationToken)
+    {
+        if (!TryGetUserId(out var userId))
+        {
+            return Unauthorized();
+        }
+
+        var result = await _mediator
+            .Send(new DeleteActivityEntryCommand { UserId = userId, EntryId = id }, cancellationToken)
             .ConfigureAwait(false);
         return result.ToAuthActionResult(() => new NoContentResult());
     }
