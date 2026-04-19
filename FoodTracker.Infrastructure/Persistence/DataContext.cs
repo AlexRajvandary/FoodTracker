@@ -1,3 +1,4 @@
+using FoodTracker.Domain.Auth;
 using FoodTracker.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -5,9 +6,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FoodTracker.Infrastructure.Persistence;
 
-public sealed class DataContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>
+public class DataContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>
 {
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+
+    public DbSet<UserAuthProvider> UserAuthProviders => Set<UserAuthProvider>();
 
     public DataContext(DbContextOptions<DataContext> options)
         : base(options)
@@ -18,18 +21,6 @@ public sealed class DataContext : IdentityDbContext<ApplicationUser, IdentityRol
     {
         ArgumentNullException.ThrowIfNull(modelBuilder);
         base.OnModelCreating(modelBuilder);
-
-        modelBuilder.Entity<RefreshToken>(entity =>
-        {
-            entity.ToTable("refresh_tokens");
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.TokenHash).IsRequired();
-            entity.HasIndex(e => e.TokenHash).IsUnique();
-            entity
-                .HasOne<ApplicationUser>()
-                .WithMany()
-                .HasForeignKey(e => e.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
-        });
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(DataContext).Assembly);
     }
 }

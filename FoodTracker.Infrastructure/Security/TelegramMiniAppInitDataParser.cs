@@ -3,7 +3,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 
-namespace FoodTracker.Web.Security;
+namespace FoodTracker.Infrastructure.Security;
 
 public static class TelegramMiniAppInitDataParser
 {
@@ -121,11 +121,5 @@ public static class TelegramMiniAppInitDataParser
         {
             // ignore
         }
-    }
-
-    private sealed class TelegramUserJson
-    {
-        public string? FirstName { get; set; }
-        public string? LastName { get; set; }
     }
 }

@@ -1,5 +1,8 @@
+using FoodTracker.Application.Abstractions;
+using FoodTracker.Application.Configuration;
 using FoodTracker.Infrastructure.Identity;
 using FoodTracker.Infrastructure.Persistence;
+using FoodTracker.Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -17,6 +20,11 @@ public static class ServiceCollectionExtensions
         {
             throw new InvalidOperationException("Connection string 'PostgreSql' is not configured.");
         }
+
+        services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
+        services.Configure<TelegramAuthOptions>(configuration.GetSection(TelegramAuthOptions.SectionName));
+        services.AddHttpContextAccessor();
+        services.AddScoped<IAuthAccountService, AuthAccountService>();
 
         services.AddDbContext<DataContext>(options => options.UseNpgsql(connectionString));
 

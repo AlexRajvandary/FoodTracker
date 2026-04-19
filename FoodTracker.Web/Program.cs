@@ -8,9 +8,9 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddFoodTrackerWebPresentation(builder.Configuration);
-builder.Services.AddFoodTrackerApplication();
 builder.Services.AddFoodTrackerInfrastructure(builder.Configuration);
+builder.Services.AddFoodTrackerApplication();
+builder.Services.AddFoodTrackerWebPresentation(builder.Configuration);
 builder.Services.AddFoodTrackerTelegram();
 
 var app = builder.Build();
