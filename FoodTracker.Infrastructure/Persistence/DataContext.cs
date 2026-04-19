@@ -1,4 +1,5 @@
 using FoodTracker.Domain.Auth;
+using FoodTracker.Domain.Nutrition;
 using FoodTracker.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -6,11 +7,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FoodTracker.Infrastructure.Persistence;
 
-public class DataContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>
+public sealed class DataContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>
 {
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
     public DbSet<UserAuthProvider> UserAuthProviders => Set<UserAuthProvider>();
+
+    public DbSet<FoodItem> FoodItems => Set<FoodItem>();
+
+    public DbSet<FoodEntry> FoodEntries => Set<FoodEntry>();
 
     public DataContext(DbContextOptions<DataContext> options)
         : base(options)

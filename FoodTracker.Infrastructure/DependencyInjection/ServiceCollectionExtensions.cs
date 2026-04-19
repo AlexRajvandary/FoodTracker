@@ -1,7 +1,9 @@
+using FoodTracker.Application.Abstractions.Persistence;
 using FoodTracker.Application.Abstractions.Services;
 using FoodTracker.Application.Configuration;
 using FoodTracker.Infrastructure.Identity;
 using FoodTracker.Infrastructure.Persistence;
+using FoodTracker.Infrastructure.Persistence.Repositories;
 using FoodTracker.Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -27,6 +29,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IAuthAccountService, AuthAccountService>();
 
         services.AddDbContext<DataContext>(options => options.UseNpgsql(connectionString));
+
+        services.AddScoped<IFoodItemRepository, FoodItemRepository>();
+        services.AddScoped<IFoodEntryRepository, FoodEntryRepository>();
 
         services
             .AddIdentityCore<ApplicationUser>(options =>
