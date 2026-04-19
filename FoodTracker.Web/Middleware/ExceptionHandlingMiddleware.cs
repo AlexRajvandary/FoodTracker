@@ -4,15 +4,17 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FoodTracker.Web.Middleware;
 
-public sealed class ExceptionHandlingMiddleware
+public class ExceptionHandlingMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly ILogger<ExceptionHandlingMiddleware> _logger;
+
     public ExceptionHandlingMiddleware(RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger)
     {
         _next = next;
         _logger = logger;
     }
+
     public async Task InvokeAsync(HttpContext context)
     {
         var cancellationToken = context.RequestAborted;
@@ -30,6 +32,7 @@ public sealed class ExceptionHandlingMiddleware
             await WriteUnhandledProblemAsync(context, cancellationToken).ConfigureAwait(false);
         }
     }
+
     private static async Task WriteValidationProblemAsync(
         HttpContext context,
         ValidationException exception,
@@ -40,16 +43,19 @@ public sealed class ExceptionHandlingMiddleware
             .ToDictionary(
                 group => group.Key,
                 group => group.Select(failure => failure.ErrorMessage).ToArray());
+
         var problemDetails = new ValidationProblemDetails(errors)
         {
             Title = "Validation failed",
             Status = StatusCodes.Status400BadRequest,
             Type = "https://tools.ietf.org/html/rfc7231#section-6.5.1"
         };
+
         context.Response.StatusCode = StatusCodes.Status400BadRequest;
         context.Response.ContentType = MediaTypeNames.Application.Json;
         await context.Response.WriteAsJsonAsync(problemDetails, cancellationToken).ConfigureAwait(false);
     }
+
     private static async Task WriteUnhandledProblemAsync(HttpContext context, CancellationToken cancellationToken)
     {
         var problemDetails = new ProblemDetails

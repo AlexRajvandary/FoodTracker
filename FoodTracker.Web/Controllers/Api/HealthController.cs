@@ -5,7 +5,7 @@ namespace FoodTracker.Web.Controllers.Api;
 
 [ApiController]
 [Route("api/[controller]")]
-public sealed class HealthController : ControllerBase
+public   class HealthController : ControllerBase
 {
     private readonly HealthCheckService _healthCheckService;
     public HealthController(HealthCheckService healthCheckService)

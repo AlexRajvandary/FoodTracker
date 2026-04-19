@@ -1,6 +1,6 @@
 namespace FoodTracker.Domain.Common.Results;
 
-public sealed class Result<T> : Result
+public class Result<T> : Result
 {
     private readonly T? _value;
 
