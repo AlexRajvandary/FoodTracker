@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
-namespace FoodTracker.Web.Controllers.Api;
+namespace FoodTracker.Api.Controllers.Api;
 
 [ApiController]
 [Route("api/[controller]")]

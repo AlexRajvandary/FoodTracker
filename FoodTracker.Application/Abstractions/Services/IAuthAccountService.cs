@@ -1,7 +1,7 @@
 using FoodTracker.Application.Features.Auth;
 using FoodTracker.Domain.Common.Results;
 
-namespace FoodTracker.Application.Abstractions;
+namespace FoodTracker.Application.Abstractions.Services;
 
 public interface IAuthAccountService
 {

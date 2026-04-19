@@ -1,4 +1,4 @@
-using FoodTracker.Application.Abstractions;
+using FoodTracker.Application.Abstractions.Services;
 using FoodTracker.Application.Configuration;
 using FoodTracker.Infrastructure.Identity;
 using FoodTracker.Infrastructure.Persistence;

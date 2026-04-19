@@ -1,4 +1,4 @@
-namespace FoodTracker.Web.Contracts;
+namespace FoodTracker.Api.Contracts;
 
 public class LogoutRequestBody
 {

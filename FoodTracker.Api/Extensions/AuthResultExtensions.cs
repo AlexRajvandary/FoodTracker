@@ -2,7 +2,7 @@ using FoodTracker.Application.Features.Auth;
 using FoodTracker.Domain.Common.Results;
 using Microsoft.AspNetCore.Mvc;
 
-namespace FoodTracker.Web.Extensions;
+namespace FoodTracker.Api.Extensions;
 
 public static class AuthResultExtensions
 {

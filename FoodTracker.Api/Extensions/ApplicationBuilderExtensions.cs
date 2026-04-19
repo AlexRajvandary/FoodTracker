@@ -1,7 +1,7 @@
-using FoodTracker.Web.Middleware;
+using FoodTracker.Api.Middleware;
 using Microsoft.AspNetCore.Builder;
 
-namespace FoodTracker.Web.Extensions;
+namespace FoodTracker.Api.Extensions;
 
 public static class ApplicationBuilderExtensions
 {

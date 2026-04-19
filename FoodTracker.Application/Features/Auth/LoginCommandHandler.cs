@@ -1,4 +1,4 @@
-using FoodTracker.Application.Abstractions;
+using FoodTracker.Application.Abstractions.Services;
 using FoodTracker.Domain.Common.Results;
 using MediatR;
 

@@ -3,7 +3,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using FoodTracker.Application.Abstractions;
+using FoodTracker.Application.Abstractions.Services;
 using FoodTracker.Application.Configuration;
 using FoodTracker.Application.Features.Auth;
 using FoodTracker.Domain.Auth;

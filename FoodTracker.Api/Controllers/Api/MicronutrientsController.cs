@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace FoodTracker.Web.Controllers.Api;
+namespace FoodTracker.Api.Controllers.Api;
 
 [ApiController]
 [Route("api/micronutrients")]

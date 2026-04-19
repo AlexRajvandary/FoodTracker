@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FoodTracker.Infrastructure"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FoodTracker.Telegram", "FoodTracker.Telegram\FoodTracker.Telegram.csproj", "{79790D0F-3229-426B-9D10-9A78FCEB037A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FoodTracker.Web", "FoodTracker.Web\FoodTracker.Web.csproj", "{3F312D7F-1B2E-45A0-948A-18C2FB31194B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FoodTracker.Api", "FoodTracker.Api\FoodTracker.Api.csproj", "{3F312D7F-1B2E-45A0-948A-18C2FB31194B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FoodTracker.Application", "FoodTracker.Application\FoodTracker.Application.csproj", "{49DB65CC-3894-498F-B3AF-C23CD868C717}"
 EndProject

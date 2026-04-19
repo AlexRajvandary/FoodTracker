@@ -2,7 +2,7 @@ using System.Net.Mime;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 
-namespace FoodTracker.Web.Middleware;
+namespace FoodTracker.Api.Middleware;
 
 public class ExceptionHandlingMiddleware
 {

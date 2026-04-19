@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
-namespace FoodTracker.Web.Extensions;
+namespace FoodTracker.Api.Extensions;
 
 public static class ServiceCollectionExtensions
 {

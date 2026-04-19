@@ -2,7 +2,7 @@ using FoodTracker.Application.DependencyInjection;
 using FoodTracker.Infrastructure.DependencyInjection;
 using FoodTracker.Infrastructure.Persistence;
 using FoodTracker.Telegram.DependencyInjection;
-using FoodTracker.Web.Extensions;
+using FoodTracker.Api.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 

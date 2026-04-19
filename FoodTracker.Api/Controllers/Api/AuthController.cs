@@ -1,12 +1,12 @@
 using System.Security.Claims;
 using FoodTracker.Application.Features.Auth;
-using FoodTracker.Web.Contracts;
-using FoodTracker.Web.Extensions;
+using FoodTracker.Api.Contracts;
+using FoodTracker.Api.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace FoodTracker.Web.Controllers.Api;
+namespace FoodTracker.Api.Controllers.Api;
 
 [ApiController]
 [Route("api/auth")]
