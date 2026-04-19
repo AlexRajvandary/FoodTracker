@@ -18,5 +18,21 @@ services:
       retries: 10
       start_period: 10s
 
+  api:
+    build:
+      context: .
+      dockerfile: FoodTracker.Api/Dockerfile
+    container_name: foodtracker-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__PostgreSql: Host=postgres;Port=5432;Database=FoodTracker;Username=postgres;Password=postgres
+    ports:
+      - "5149:8080"
+
 volumes:
   postgres_data:
