@@ -4,7 +4,7 @@ using MediatR;
 
 namespace FoodTracker.Application.Features.Nutrition;
 
-public sealed class ListFoodCatalogQueryHandler : IRequestHandler<ListFoodCatalogQuery, Result<IReadOnlyList<FoodCatalogItemDto>>>
+public sealed class ListFoodCatalogQueryHandler : IRequestHandler<ListFoodCatalogQuery, Result<IReadOnlyList<FoodItemDto>>>
 {
     private static readonly HashSet<string> AllowedCategories =
     [
@@ -24,16 +24,16 @@ public sealed class ListFoodCatalogQueryHandler : IRequestHandler<ListFoodCatalo
         _items = items;
     }
 
-    public async Task<Result<IReadOnlyList<FoodCatalogItemDto>>> Handle(ListFoodCatalogQuery request, CancellationToken cancellationToken)
+    public async Task<Result<IReadOnlyList<FoodItemDto>>> Handle(ListFoodCatalogQuery request, CancellationToken cancellationToken)
     {
         if (!string.IsNullOrWhiteSpace(request.Category) && !AllowedCategories.Contains(request.Category))
         {
-            return Result<IReadOnlyList<FoodCatalogItemDto>>.Failure(
+            return Result<IReadOnlyList<FoodItemDto>>.Failure(
                 new Error(FoodErrorCodes.InvalidCategory, "Неизвестная категория."));
         }
 
-        var list = await _items.ListCatalogAsync(request.Q, request.Category, cancellationToken).ConfigureAwait(false);
-        var dto = list.Where(x => !string.IsNullOrEmpty(x.Category)).Select(x => x.ToCatalogDto()).ToList();
-        return Result<IReadOnlyList<FoodCatalogItemDto>>.Success(dto);
+        var list = await _items.ListCatalogAsync(request.Query, request.Category, cancellationToken).ConfigureAwait(false);
+        var dto = list.Where(x => !string.IsNullOrEmpty(x.Category)).Select(x => x.ToDto()).ToList();
+        return Result<IReadOnlyList<FoodItemDto>>.Success(dto);
     }
 }

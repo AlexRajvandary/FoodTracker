@@ -19,9 +19,9 @@ public class ActivityTypesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> List([FromQuery] string? q, CancellationToken cancellationToken)
+    public async Task<IActionResult> List([FromQuery] string? query, CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(new ListActivityTypesQuery { Q = q }, cancellationToken).ConfigureAwait(false);
+        var result = await _mediator.Send(new ListActivityTypesQuery { Query = query }, cancellationToken).ConfigureAwait(false);
         return result.ToAuthActionResult();
     }
 }

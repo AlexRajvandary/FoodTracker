@@ -7,61 +7,80 @@ namespace FoodTracker.Infrastructure.Persistence.Repositories;
 public class FoodItemRepository : IFoodItemRepository
 {
     private const int DefaultTake = 100;
-    private readonly DataContext _db;
+    private readonly DataContext _dataContext;
 
     public FoodItemRepository(DataContext db)
     {
-        _db = db;
+        _dataContext = db;
+    }
+
+    public async Task<FoodItem> CreateAsync(FoodItem item, CancellationToken cancellationToken)
+    {
+        await _dataContext.FoodItems.AddAsync(item, cancellationToken).ConfigureAwait(false);
+        await _dataContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        return item;
+    }
+
+    public async Task DeleteAsync(FoodItem item, CancellationToken cancellationToken)
+    {
+        _dataContext.FoodItems.Remove(item);
+        await _dataContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 
     public async Task<FoodItem?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        return await _db.FoodItems.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id, cancellationToken).ConfigureAwait(false);
+        return await _dataContext
+            .FoodItems
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken)
+            .ConfigureAwait(false);
     }
 
-    public async Task<IReadOnlyList<FoodItem>> SearchByNameAsync(string query, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<FoodItem>> ListCatalogAsync(
+       string? query,
+       string? category,
+       CancellationToken cancellationToken)
     {
-        var q = query.Trim();
-        if (q.Length == 0)
+        var foodItems = _dataContext
+            .FoodItems
+            .AsNoTracking()
+            .Where(x => x.Category != null);
+
+        if (!string.IsNullOrWhiteSpace(category))
         {
-            return Array.Empty<FoodItem>();
+            foodItems = foodItems.Where(x => x.Category == category);
         }
 
-        var pattern = "%" + EscapeLike(q) + "%";
-        return await _db
-            .FoodItems.AsNoTracking()
-            .Where(x => EF.Functions.ILike(x.Name, pattern))
+        if (!string.IsNullOrWhiteSpace(query))
+        {
+            var pattern = "%" + EscapeLike(query.Trim()) + "%";
+            foodItems = foodItems.Where(x => EF.Functions.ILike(x.Name, pattern));
+        }
+
+        return await foodItems
             .OrderBy(x => x.Name)
             .Take(DefaultTake)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
     }
 
-    public async Task<IReadOnlyList<FoodItem>> ListCatalogAsync(
-        string? query,
-        string? category,
-        CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<FoodItem>> SearchByNameAsync(string query, CancellationToken cancellationToken)
     {
-        var q = _db.FoodItems.AsNoTracking().Where(x => x.Category != null);
-        if (!string.IsNullOrWhiteSpace(category))
+        if (query.Length == 0)
         {
-            q = q.Where(x => x.Category == category);
+            return [];
         }
 
-        if (!string.IsNullOrWhiteSpace(query))
-        {
-            var pattern = "%" + EscapeLike(query.Trim()) + "%";
-            q = q.Where(x => EF.Functions.ILike(x.Name, pattern));
-        }
-
-        return await q.OrderBy(x => x.Name).Take(DefaultTake).ToListAsync(cancellationToken).ConfigureAwait(false);
-    }
-
-    public async Task<FoodItem> AddAsync(FoodItem item, CancellationToken cancellationToken)
-    {
-        _db.FoodItems.Add(item);
-        await _db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        return item;
+        query = query.Trim();
+        var pattern = "%" + EscapeLike(query) + "%";
+        return await _dataContext
+            .FoodItems
+            .AsNoTracking()
+            .Where(x => EF.Functions.ILike(x.Name, pattern))
+            .OrderBy(x => x.Name)
+            .Take(DefaultTake)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
     }
 
     private static string EscapeLike(string value) => value.Replace("\\", "\\\\", StringComparison.Ordinal).Replace("%", "\\%", StringComparison.Ordinal).Replace("_", "\\_", StringComparison.Ordinal);

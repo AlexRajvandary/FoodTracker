@@ -49,7 +49,7 @@ public class NutritionController : ControllerBase
 
     [HttpPost("food-entries")]
     public async Task<IActionResult> CreateFoodEntry(
-        [FromBody] CreateFoodEntryRequest body,
+        [FromBody] CreateMealEntryRequest body,
         CancellationToken cancellationToken)
     {
         if (!TryGetUserId(out var userId))

@@ -16,21 +16,7 @@ internal static class NutritionMapper
             CarbsPer100g = x.CarbsPer100g,
             PortionGrams = x.PortionGrams,
             PortionHint = x.PortionHint,
-        };
-
-    public static FoodCatalogItemDto ToCatalogDto(this FoodItem x) =>
-        new()
-        {
-            Id = x.Id,
-            Name = x.Name,
-            Description = x.Description,
-            CaloriesPer100g = x.CaloriesPer100g,
-            ProteinsPer100g = x.ProteinsPer100g,
-            FatsPer100g = x.FatsPer100g,
-            CarbsPer100g = x.CarbsPer100g,
-            PortionGrams = x.PortionGrams,
-            PortionHint = x.PortionHint,
-            Category = x.Category ?? string.Empty,
+            Category = x.Category,
         };
 
     public static FoodEntryDto ToDto(this FoodEntry x) =>

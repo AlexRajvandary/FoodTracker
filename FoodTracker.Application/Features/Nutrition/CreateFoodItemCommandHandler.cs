@@ -7,32 +7,32 @@ namespace FoodTracker.Application.Features.Nutrition;
 
 public sealed class CreateFoodItemCommandHandler : IRequestHandler<CreateFoodItemCommand, Result<FoodItemDto>>
 {
-    private readonly IFoodItemRepository _items;
+    private readonly IFoodItemRepository _foodItemsRepository;
 
     public CreateFoodItemCommandHandler(IFoodItemRepository items)
     {
-        _items = items;
+        _foodItemsRepository = items;
     }
 
-    public async Task<Result<FoodItemDto>> Handle(CreateFoodItemCommand request, CancellationToken cancellationToken)
+    public async Task<Result<FoodItemDto>> Handle(CreateFoodItemCommand command, CancellationToken cancellationToken)
     {
-        var item = new FoodItem
+        var foodItem = new FoodItem
         {
             Id = Guid.NewGuid(),
-            Name = request.Name.Trim(),
-            Description = string.IsNullOrWhiteSpace(request.Description) ? null : request.Description.Trim(),
-            CaloriesPer100g = request.CaloriesPer100g,
-            ProteinsPer100g = request.ProteinsPer100g ?? 0,
-            FatsPer100g = request.FatsPer100g ?? 0,
-            CarbsPer100g = request.CarbsPer100g ?? 0,
-            PortionGrams = null,
-            PortionHint = null,
-            Category = null,
-            OwnerUserId = request.UserId,
+            Name = command.Name.Trim(),
+            Description = string.IsNullOrWhiteSpace(command.Description) ? null : command.Description.Trim(),
+            CaloriesPer100g = command.CaloriesPer100g,
+            ProteinsPer100g = command.ProteinsPer100g ?? 0,
+            FatsPer100g = command.FatsPer100g ?? 0,
+            CarbsPer100g = command.CarbsPer100g ?? 0,
+            PortionGrams = command.PortionGrams,
+            PortionHint = command.PortionHint,
+            Category = command.Category,
+            OwnerUserId = command.UserId,
             CreatedAtUtc = DateTime.UtcNow,
         };
 
-        await _items.AddAsync(item, cancellationToken).ConfigureAwait(false);
-        return Result<FoodItemDto>.Success(item.ToDto());
+        await _foodItemsRepository.CreateAsync(foodItem, cancellationToken).ConfigureAwait(false);
+        return Result<FoodItemDto>.Success(foodItem.ToDto());
     }
 }

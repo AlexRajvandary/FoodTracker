@@ -12,4 +12,7 @@ public sealed class CreateFoodItemCommand : IRequest<Result<FoodItemDto>>
     public decimal? ProteinsPer100g { get; init; }
     public decimal? FatsPer100g { get; init; }
     public decimal? CarbsPer100g { get; init; }
+    public decimal? PortionGrams { get; set; }
+    public string? PortionHint { get; set; }
+    public string? Category { get; set; }
 }

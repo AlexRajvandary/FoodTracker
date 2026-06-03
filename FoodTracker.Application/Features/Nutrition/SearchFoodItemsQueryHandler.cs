@@ -15,7 +15,7 @@ public sealed class SearchFoodItemsQueryHandler : IRequestHandler<SearchFoodItem
 
     public async Task<Result<IReadOnlyList<FoodItemDto>>> Handle(SearchFoodItemsQuery request, CancellationToken cancellationToken)
     {
-        var list = await _items.SearchByNameAsync(request.Q, cancellationToken).ConfigureAwait(false);
+        var list = await _items.SearchByNameAsync(request.Query, cancellationToken).ConfigureAwait(false);
         return Result<IReadOnlyList<FoodItemDto>>.Success(list.Select(x => x.ToDto()).ToList());
     }
 }

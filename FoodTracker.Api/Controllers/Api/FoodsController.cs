@@ -20,42 +20,129 @@ public class FoodsController : ControllerBase
         _mediator = mediator;
     }
 
-    [HttpGet("search")]
-    public async Task<IActionResult> Search([FromQuery] string q, CancellationToken cancellationToken)
-    {
-        var result = await _mediator.Send(new SearchFoodItemsQuery { Q = q }, cancellationToken).ConfigureAwait(false);
-        return result.ToAuthActionResult();
-    }
-
     [HttpGet("catalog")]
-    public async Task<IActionResult> Catalog([FromQuery] string? q, [FromQuery] string? category, CancellationToken cancellationToken)
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(IReadOnlyList<FoodItemDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> Catalog([FromQuery] string? query, [FromQuery] string? category, CancellationToken cancellationToken)
     {
         var result = await _mediator
-            .Send(new ListFoodCatalogQuery { Q = q, Category = category }, cancellationToken)
+            .Send(new ListFoodCatalogQuery { Query = query , Category = category }, cancellationToken)
             .ConfigureAwait(false);
-        return result.ToAuthActionResult();
+
+        return Ok(result);
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateFoodItem([FromBody] CreateFoodItemRequest body, CancellationToken cancellationToken)
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(FoodItemDto), StatusCodes.Status202Accepted)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> CreateFoodItem([FromBody] CreateFoodItemRequest request, CancellationToken cancellationToken)
+    {
+        //if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId))
+        //{
+        //    return Unauthorized();
+        //}
+
+        var command = new CreateFoodItemCommand
+        {
+            //UserId = userId,
+            UserId = Guid.NewGuid(),
+            Name = request.Name,
+            Category = request.Category,
+            Description = request.Description,
+            CaloriesPer100g = request.CaloriesPer100g,
+            ProteinsPer100g = request.ProteinsPer100g,
+            FatsPer100g = request.FatsPer100g,
+            CarbsPer100g = request.CarbsPer100g,
+        };
+
+        var result = await _mediator.Send(command, cancellationToken).ConfigureAwait(false);
+        return result.ToAuthActionResult(dto => new ObjectResult(dto) { StatusCode = StatusCodes.Status202Accepted });
+    }
+
+    [HttpDelete("{foodItemId:guid}")]
+    [AllowAnonymous]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> DeleteFoodItem(Guid foodItemId, CancellationToken cancellationToken)
+    {
+        //if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId))
+        //{
+        //    return Unauthorized();
+        //}
+
+        var command = new DeleteFoodItemCommand
+        {
+            //UserId = userId,
+            UserId = Guid.NewGuid(),
+            FoodItemId = foodItemId
+        };
+
+        var result = await _mediator.Send(command, cancellationToken).ConfigureAwait(false);
+
+        return result.ToAuthActionResult(() => NoContent());
+    }
+
+    [HttpPatch("{foodItemId:guid}")]
+    [ProducesResponseType(typeof(FoodItemDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> PatchFoodItem(Guid foodItemId, [FromBody] PatchFoodItemRequest request, CancellationToken cancellationToken)
     {
         if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId))
         {
             return Unauthorized();
         }
 
-        var command = new CreateFoodItemCommand
+        var command = new PatchFoodItemCommand
         {
             UserId = userId,
-            Name = body.Name,
-            Description = body.Description,
-            CaloriesPer100g = body.CaloriesPer100g,
-            ProteinsPer100g = body.ProteinsPer100g,
-            FatsPer100g = body.FatsPer100g,
-            CarbsPer100g = body.CarbsPer100g,
+            FoodItemId = foodItemId,
+            Name = request.Name,
+            Description = request.Description,
+            CaloriesPer100g = request.CaloriesPer100g,
+            ProteinsPer100g = request.ProteinsPer100g,
+            FatsPer100g = request.FatsPer100g,
+            CarbsPer100g = request.CarbsPer100g,
         };
 
         var result = await _mediator.Send(command, cancellationToken).ConfigureAwait(false);
-        return result.ToAuthActionResult(dto => new ObjectResult(dto) { StatusCode = StatusCodes.Status202Accepted });
+        return result.ToAuthActionResult(Ok);
+    }
+
+    [HttpGet("search")]
+    public async Task<IActionResult> Search([FromQuery] string query, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new SearchFoodItemsQuery { Query = query }, cancellationToken).ConfigureAwait(false);
+        return result.ToAuthActionResult();
+    }
+
+    [HttpPut("{foodItemId:guid}")]
+    [ProducesResponseType(typeof(FoodItemDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdateFoodItem(Guid foodItemId, [FromBody] UpdateFoodItemRequest request, CancellationToken cancellationToken)
+    {
+        if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId))
+        {
+            return Unauthorized();
+        }
+
+        var command = new UpdateFoodItemCommand
+        {
+            UserId = userId,
+            FoodItemId = foodItemId,
+            Name = request.Name,
+            Description = request.Description,
+            CaloriesPer100g = request.CaloriesPer100g,
+            ProteinsPer100g = request.ProteinsPer100g,
+            FatsPer100g = request.FatsPer100g,
+            CarbsPer100g = request.CarbsPer100g,
+        };
+
+        var result = await _mediator.Send(command, cancellationToken).ConfigureAwait(false);
+
+        return result.ToAuthActionResult(Ok);
     }
 }

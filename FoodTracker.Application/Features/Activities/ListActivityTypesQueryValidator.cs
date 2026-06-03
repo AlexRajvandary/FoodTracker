@@ -6,6 +6,6 @@ public sealed class ListActivityTypesQueryValidator : AbstractValidator<ListActi
 {
     public ListActivityTypesQueryValidator()
     {
-        When(x => !string.IsNullOrEmpty(x.Q), () => RuleFor(x => x.Q!).MinimumLength(1));
+        When(x => !string.IsNullOrEmpty(x.Query), () => RuleFor(x => x.Query!).MinimumLength(1));
     }
 }

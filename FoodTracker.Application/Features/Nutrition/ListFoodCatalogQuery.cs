@@ -3,8 +3,8 @@ using MediatR;
 
 namespace FoodTracker.Application.Features.Nutrition;
 
-public sealed class ListFoodCatalogQuery : IRequest<Result<IReadOnlyList<FoodCatalogItemDto>>>
+public sealed class ListFoodCatalogQuery : IRequest<Result<IReadOnlyList<FoodItemDto>>>
 {
-    public string? Q { get; init; }
+    public string? Query { get; init; }
     public string? Category { get; init; }
 }

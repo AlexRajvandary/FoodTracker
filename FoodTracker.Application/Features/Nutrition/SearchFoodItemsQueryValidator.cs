@@ -6,6 +6,6 @@ public sealed class SearchFoodItemsQueryValidator : AbstractValidator<SearchFood
 {
     public SearchFoodItemsQueryValidator()
     {
-        RuleFor(x => x.Q).NotEmpty().MinimumLength(1);
+        RuleFor(x => x.Query).NotEmpty().MinimumLength(1);
     }
 }
