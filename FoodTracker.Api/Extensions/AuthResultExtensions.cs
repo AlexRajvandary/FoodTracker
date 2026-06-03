@@ -33,8 +33,7 @@ public static class AuthResultExtensions
         var body = new { message = error.Message };
         return error.Code switch
         {
-            AuthErrorCodes.Unauthorized or AuthErrorCodes.TelegramInvalidInitData or AuthErrorCodes.TelegramMissingUser =>
-                new UnauthorizedObjectResult(body),
+            AuthErrorCodes.Unauthorized or AuthErrorCodes.TelegramInvalidInitData or AuthErrorCodes.TelegramMissingUser => new UnauthorizedObjectResult(body),
             AuthErrorCodes.Conflict => new ConflictObjectResult(body),
             AuthErrorCodes.TelegramNotConfigured => new ObjectResult(body) { StatusCode = StatusCodes.Status503ServiceUnavailable },
             AuthErrorCodes.NotFound => new NotFoundObjectResult(body),

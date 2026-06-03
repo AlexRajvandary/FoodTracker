@@ -6,11 +6,11 @@ namespace FoodTracker.Infrastructure.Persistence.Repositories;
 
 public class ActivityEntryRepository : IActivityEntryRepository
 {
-    private readonly DataContext _db;
+    private readonly DataContext _dataContext;
 
     public ActivityEntryRepository(DataContext db)
     {
-        _db = db;
+        _dataContext = db;
     }
 
     public async Task<IReadOnlyList<ActivityEntry>> ListForUserAsync(
@@ -20,7 +20,7 @@ public class ActivityEntryRepository : IActivityEntryRepository
         DateOnly? date,
         CancellationToken cancellationToken)
     {
-        var q = _db.ActivityEntries.AsNoTracking().Where(x => x.UserId == userId);
+        var q = _dataContext.ActivityEntries.AsNoTracking().Where(x => x.UserId == userId);
         if (date is { } d)
         {
             var start = DateTime.SpecifyKind(d.ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc);
@@ -51,26 +51,26 @@ public class ActivityEntryRepository : IActivityEntryRepository
 
     public async Task<ActivityEntry?> GetOwnedAsync(Guid userId, Guid entryId, CancellationToken cancellationToken)
     {
-        return await _db
+        return await _dataContext
             .ActivityEntries.FirstOrDefaultAsync(x => x.Id == entryId && x.UserId == userId, cancellationToken)
             .ConfigureAwait(false);
     }
 
     public async Task<ActivityEntry> AddAsync(ActivityEntry entry, CancellationToken cancellationToken)
     {
-        _db.ActivityEntries.Add(entry);
-        await _db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        _dataContext.ActivityEntries.Add(entry);
+        await _dataContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return entry;
     }
 
     public async Task UpdateAsync(ActivityEntry entry, CancellationToken cancellationToken)
     {
-        await _db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        await _dataContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 
     public async Task DeleteAsync(ActivityEntry entry, CancellationToken cancellationToken)
     {
-        _db.ActivityEntries.Remove(entry);
-        await _db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        _dataContext.ActivityEntries.Remove(entry);
+        await _dataContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 }

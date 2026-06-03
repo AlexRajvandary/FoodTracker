@@ -13,4 +13,7 @@ public sealed class UpdateFoodItemCommand : IRequest<Result<FoodItemDto>>
     public decimal ProteinsPer100g { get; init; }
     public decimal FatsPer100g { get; init; }
     public decimal CarbsPer100g { get; init; }
+    public decimal PortionGrams { get; init; }
+    public string? PortionHint { get; init; }
+    public string? Category { get; init; }
 }
