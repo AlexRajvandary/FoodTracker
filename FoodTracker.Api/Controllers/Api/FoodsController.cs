@@ -33,20 +33,19 @@ public class FoodsController : ControllerBase
     }
 
     [HttpPost]
-    [AllowAnonymous]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(FoodItemDto), StatusCodes.Status202Accepted)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> CreateFoodItem([FromBody] CreateFoodItemRequest request, CancellationToken cancellationToken)
     {
-        //if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId))
-        //{
-        //    return Unauthorized();
-        //}
+        if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId))
+        {
+            return Unauthorized();
+        }
 
         var command = new CreateFoodItemCommand
         {
-            //UserId = userId,
-            UserId = Guid.NewGuid(),
+            UserId = userId,
             Name = request.Name,
             Category = request.Category,
             Description = request.Description,
@@ -61,21 +60,20 @@ public class FoodsController : ControllerBase
     }
 
     [HttpDelete("{foodItemId:guid}")]
-    [AllowAnonymous]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteFoodItem(Guid foodItemId, CancellationToken cancellationToken)
     {
-        //if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId))
-        //{
-        //    return Unauthorized();
-        //}
+        if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId))
+        {
+            return Unauthorized();
+        }
 
         var command = new DeleteFoodItemCommand
         {
-            //UserId = userId,
-            UserId = Guid.NewGuid(),
+            UserId = userId,
             FoodItemId = foodItemId
         };
 
@@ -85,6 +83,7 @@ public class FoodsController : ControllerBase
     }
 
     [HttpPatch("{foodItemId:guid}")]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(FoodItemDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -119,6 +118,7 @@ public class FoodsController : ControllerBase
     }
 
     [HttpPut("{foodItemId:guid}")]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(FoodItemDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
