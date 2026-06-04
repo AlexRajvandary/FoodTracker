@@ -21,7 +21,7 @@ public class FoodsController : ControllerBase
     }
 
     [HttpGet("catalog")]
-    [AllowAnonymous]
+    [Authorize(Roles = "User")]
     [ProducesResponseType(typeof(IReadOnlyList<FoodItemDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> Catalog([FromQuery] string? query, [FromQuery] string? category, CancellationToken cancellationToken)
     {

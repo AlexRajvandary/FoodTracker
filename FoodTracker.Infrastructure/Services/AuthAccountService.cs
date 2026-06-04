@@ -23,73 +23,95 @@ public class AuthAccountService : IAuthAccountService
 {
     private static readonly TimeSpan TelegramInitDataMaxAge = TimeSpan.FromHours(24);
 
-    private readonly DataContext _db;
-    private readonly UserManager<ApplicationUser> _userManager;
-    private readonly JwtOptions _jwt;
-    private readonly TelegramAuthOptions _telegram;
+    private readonly DataContext _dataContext;
     private readonly IHttpContextAccessor? _httpContextAccessor;
+    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly JwtOptions _jwtOptions;
+    private readonly TelegramAuthOptions _telegramOptions;
 
     public AuthAccountService(
-        DataContext db,
+        DataContext dataContext,
         UserManager<ApplicationUser> userManager,
         IOptions<JwtOptions> jwtOptions,
         IOptions<TelegramAuthOptions> telegramOptions,
         IHttpContextAccessor? httpContextAccessor = null)
     {
-        _db = db;
+        _dataContext = dataContext;
         _userManager = userManager;
-        _jwt = jwtOptions.Value;
-        _telegram = telegramOptions.Value;
+        _jwtOptions = jwtOptions.Value;
+        _telegramOptions = telegramOptions.Value;
         _httpContextAccessor = httpContextAccessor;
     }
 
-    public async Task<Result<AuthTokensDto>> RegisterAsync(RegisterCommand command, CancellationToken cancellationToken)
+    public async Task<Result<AuthUserDto>> GetMeAsync(GetMeQuery query, CancellationToken cancellationToken)
     {
-        var user = new ApplicationUser
+        var user = await _userManager.FindByIdAsync(query.UserId.ToString()).ConfigureAwait(false);
+        if (user is null)
         {
-            UserName = command.Email,
-            Email = command.Email,
-            FirstName = command.FirstName,
-            LastName = command.LastName,
-        };
-
-        var create = await _userManager.CreateAsync(user, command.Password).ConfigureAwait(false);
-        if (!create.Succeeded)
-        {
-            return Result<AuthTokensDto>.Failure(
-                new Error(AuthErrorCodes.Identity, string.Join(' ', create.Errors.Select(e => e.Description))));
+            return Result<AuthUserDto>.Failure(new Error(AuthErrorCodes.NotFound, "Пользователь не найден."));
         }
 
-        var roleResult = await _userManager.AddToRoleAsync(user, "user").ConfigureAwait(false);
-        if (!roleResult.Succeeded)
+        var roles = await _userManager.GetRolesAsync(user).ConfigureAwait(false);
+        return Result<AuthUserDto>.Success(MapUser(user, roles));
+    }
+
+    public async Task<Result> LinkTelegramAsync(LinkTelegramCommand command, CancellationToken cancellationToken)
+    {
+        var botError = ValidateTelegramBotConfigured();
+        if (botError is not null)
         {
-            await _userManager.DeleteAsync(user).ConfigureAwait(false);
-            return Result<AuthTokensDto>.Failure(
-                new Error(AuthErrorCodes.Identity, string.Join(' ', roleResult.Errors.Select(e => e.Description))));
+            return Result.Failure(botError);
         }
 
-        var normalizedEmail = _userManager.NormalizeEmail(command.Email);
-        if (string.IsNullOrEmpty(normalizedEmail))
+        if (!TelegramMiniAppInitDataParser.TryValidate(
+                command.InitData,
+                _telegramOptions.BotToken,
+                TelegramInitDataMaxAge,
+                out var fields))
         {
-            await _userManager.DeleteAsync(user).ConfigureAwait(false);
-            return Result<AuthTokensDto>.Failure(new Error(AuthErrorCodes.Identity, "Не удалось нормализовать email."));
+            return Result.Failure(
+                new Error(AuthErrorCodes.TelegramInvalidInitData, "Неверная подпись initData."));
         }
 
-        var providerError = await TryAddAuthProviderExclusiveAsync(
-                user.Id,
-                AuthProviderKind.EmailPassword,
-                normalizedEmail,
+        if (!TelegramMiniAppInitDataParser.TryGetTelegramUserId(fields!, out var telegramUserId))
+        {
+            return Result.Failure(
+                new Error(AuthErrorCodes.TelegramMissingUser, "В initData нет user.id."));
+        }
+
+        var key = telegramUserId.ToString(CultureInfo.InvariantCulture);
+        var link = await _dataContext
+            .UserAuthProviders.AsNoTracking()
+            .FirstOrDefaultAsync(
+                x => x.ProviderKind == AuthProviderKind.Telegram && x.ProviderKey == key,
                 cancellationToken)
             .ConfigureAwait(false);
 
-        if (providerError is not null)
+        if (link is not null)
         {
-            await _userManager.DeleteAsync(user).ConfigureAwait(false);
-            return Result<AuthTokensDto>.Failure(providerError);
+            if (link.UserId != command.UserId)
+            {
+                return Result.Failure(
+                    new Error(AuthErrorCodes.Conflict, "Этот Telegram уже привязан к другому аккаунту."));
+            }
+
+            return Result.Success();
         }
 
-        var tokens = await IssueTokensAsync(user, cancellationToken).ConfigureAwait(false);
-        return Result<AuthTokensDto>.Success(tokens);
+        var user = await _userManager.FindByIdAsync(command.UserId.ToString()).ConfigureAwait(false);
+        if (user is null)
+        {
+            return Result.Failure(new Error(AuthErrorCodes.Unauthorized, "Пользователь не найден."));
+        }
+
+        var providerError = await TryAddAuthProviderExclusiveAsync(command.UserId, AuthProviderKind.Telegram, key, cancellationToken)
+            .ConfigureAwait(false);
+        if (providerError is not null)
+        {
+            return Result.Failure(providerError);
+        }
+
+        return Result.Success();
     }
 
     public async Task<Result<AuthTokensDto>> LoginAsync(LoginCommand command, CancellationToken cancellationToken)
@@ -103,18 +125,6 @@ public class AuthAccountService : IAuthAccountService
         }
 
         var tokens = await IssueTokensAsync(user, cancellationToken).ConfigureAwait(false);
-        return Result<AuthTokensDto>.Success(tokens);
-    }
-
-    public async Task<Result<AuthTokensDto>> RefreshAsync(RefreshCommand command, CancellationToken cancellationToken)
-    {
-        var tokens = await TryRefreshTokensAsync(command.RefreshToken, cancellationToken).ConfigureAwait(false);
-        if (tokens is null)
-        {
-            return Result<AuthTokensDto>.Failure(
-                new Error(AuthErrorCodes.Unauthorized, "Недействительный refresh-токен."));
-        }
-
         return Result<AuthTokensDto>.Success(tokens);
     }
 
@@ -133,21 +143,7 @@ public class AuthAccountService : IAuthAccountService
         return Result.Success();
     }
 
-    public async Task<Result<AuthUserDto>> GetMeAsync(GetMeQuery query, CancellationToken cancellationToken)
-    {
-        var user = await _userManager.FindByIdAsync(query.UserId.ToString()).ConfigureAwait(false);
-        if (user is null)
-        {
-            return Result<AuthUserDto>.Failure(new Error(AuthErrorCodes.NotFound, "Пользователь не найден."));
-        }
-
-        var roles = await _userManager.GetRolesAsync(user).ConfigureAwait(false);
-        return Result<AuthUserDto>.Success(MapUser(user, roles));
-    }
-
-    public async Task<Result<AuthTokensDto>> TelegramSignInAsync(
-        TelegramAuthCommand command,
-        CancellationToken cancellationToken)
+    public async Task<Result<AuthTokensDto>> TelegramSignInAsync(TelegramAuthCommand command, CancellationToken cancellationToken)
     {
         var botError = ValidateTelegramBotConfigured();
         if (botError is not null)
@@ -157,7 +153,7 @@ public class AuthAccountService : IAuthAccountService
 
         if (!TelegramMiniAppInitDataParser.TryValidate(
                 command.InitData,
-                _telegram.BotToken,
+                _telegramOptions.BotToken,
                 TelegramInitDataMaxAge,
                 out var fields))
         {
@@ -172,7 +168,7 @@ public class AuthAccountService : IAuthAccountService
         }
 
         var key = telegramUserId.ToString(CultureInfo.InvariantCulture);
-        var existingLink = await _db
+        var existingLink = await _dataContext
             .UserAuthProviders.AsNoTracking()
             .FirstOrDefaultAsync(
                 x => x.ProviderKind == AuthProviderKind.Telegram && x.ProviderKey == key,
@@ -227,215 +223,98 @@ public class AuthAccountService : IAuthAccountService
         return Result<AuthTokensDto>.Success(issued);
     }
 
-    public async Task<Result> LinkTelegramAsync(LinkTelegramCommand command, CancellationToken cancellationToken)
+    public async Task<Result<AuthTokensDto>> RefreshAsync(RefreshCommand command, CancellationToken cancellationToken)
     {
-        var botError = ValidateTelegramBotConfigured();
-        if (botError is not null)
+        var tokens = await TryRefreshTokensAsync(command.RefreshToken, cancellationToken).ConfigureAwait(false);
+        if (tokens is null)
         {
-            return Result.Failure(botError);
+            return Result<AuthTokensDto>.Failure(
+                new Error(AuthErrorCodes.Unauthorized, "Недействительный refresh-токен."));
         }
 
-        if (!TelegramMiniAppInitDataParser.TryValidate(
-                command.InitData,
-                _telegram.BotToken,
-                TelegramInitDataMaxAge,
-                out var fields))
+        return Result<AuthTokensDto>.Success(tokens);
+    }
+
+    public async Task<Result<AuthTokensDto>> RegisterAsync(RegisterCommand command, CancellationToken cancellationToken)
+    {
+        var user = new ApplicationUser
         {
-            return Result.Failure(
-                new Error(AuthErrorCodes.TelegramInvalidInitData, "Неверная подпись initData."));
+            UserName = command.Email,
+            Email = command.Email,
+            FirstName = command.FirstName,
+            LastName = command.LastName,
+        };
+
+        var create = await _userManager.CreateAsync(user, command.Password).ConfigureAwait(false);
+        if (!create.Succeeded)
+        {
+            return Result<AuthTokensDto>.Failure(
+                new Error(AuthErrorCodes.Identity, string.Join(' ', create.Errors.Select(e => e.Description))));
         }
 
-        if (!TelegramMiniAppInitDataParser.TryGetTelegramUserId(fields!, out var telegramUserId))
+        var roleResult = await _userManager.AddToRoleAsync(user, "user").ConfigureAwait(false);
+        if (!roleResult.Succeeded)
         {
-            return Result.Failure(
-                new Error(AuthErrorCodes.TelegramMissingUser, "В initData нет user.id."));
+            await _userManager.DeleteAsync(user).ConfigureAwait(false);
+            return Result<AuthTokensDto>.Failure(
+                new Error(AuthErrorCodes.Identity, string.Join(' ', roleResult.Errors.Select(e => e.Description))));
         }
 
-        var key = telegramUserId.ToString(CultureInfo.InvariantCulture);
-        var link = await _db
-            .UserAuthProviders.AsNoTracking()
-            .FirstOrDefaultAsync(
-                x => x.ProviderKind == AuthProviderKind.Telegram && x.ProviderKey == key,
+        var normalizedEmail = _userManager.NormalizeEmail(command.Email);
+        if (string.IsNullOrEmpty(normalizedEmail))
+        {
+            await _userManager.DeleteAsync(user).ConfigureAwait(false);
+            return Result<AuthTokensDto>.Failure(new Error(AuthErrorCodes.Identity, "Не удалось нормализовать email."));
+        }
+
+        var providerError = await TryAddAuthProviderExclusiveAsync(
+                user.Id,
+                AuthProviderKind.EmailPassword,
+                normalizedEmail,
                 cancellationToken)
             .ConfigureAwait(false);
 
-        if (link is not null)
-        {
-            if (link.UserId != command.UserId)
-            {
-                return Result.Failure(
-                    new Error(AuthErrorCodes.Conflict, "Этот Telegram уже привязан к другому аккаунту."));
-            }
-
-            return Result.Success();
-        }
-
-        var user = await _userManager.FindByIdAsync(command.UserId.ToString()).ConfigureAwait(false);
-        if (user is null)
-        {
-            return Result.Failure(new Error(AuthErrorCodes.Unauthorized, "Пользователь не найден."));
-        }
-
-        var providerError = await TryAddAuthProviderExclusiveAsync(command.UserId, AuthProviderKind.Telegram, key, cancellationToken)
-            .ConfigureAwait(false);
         if (providerError is not null)
         {
-            return Result.Failure(providerError);
+            await _userManager.DeleteAsync(user).ConfigureAwait(false);
+            return Result<AuthTokensDto>.Failure(providerError);
         }
 
-        return Result.Success();
+        var tokens = await IssueTokensAsync(user, cancellationToken).ConfigureAwait(false);
+        return Result<AuthTokensDto>.Success(tokens);
     }
 
-    private Error? ValidateTelegramBotConfigured()
+    private static string CreateOpaqueRefreshToken()
     {
-        if (string.IsNullOrWhiteSpace(_telegram.BotToken)
-            || _telegram.BotToken.Contains("PASTE", StringComparison.OrdinalIgnoreCase))
-        {
-            return new Error(AuthErrorCodes.TelegramNotConfigured, "Telegram BotToken не настроен.");
-        }
-
-        return null;
+        Span<byte> buffer = stackalloc byte[64];
+        RandomNumberGenerator.Fill(buffer);
+        return Convert.ToBase64String(buffer)
+            .Replace("+", "-", StringComparison.Ordinal)
+            .Replace("/", "_", StringComparison.Ordinal)
+            .TrimEnd('=');
     }
 
-    private async Task<Error?> TryAddAuthProviderExclusiveAsync(
-        Guid userId,
-        AuthProviderKind kind,
-        string providerKey,
-        CancellationToken cancellationToken)
+    private static AuthUserDto MapUser(ApplicationUser user, IList<string> roles)
     {
-        var exists = await _db.UserAuthProviders.AnyAsync(
-                x => x.ProviderKind == kind && x.ProviderKey == providerKey,
-                cancellationToken)
-            .ConfigureAwait(false);
-        if (exists)
+        var role = roles.FirstOrDefault() ?? "user";
+        return new AuthUserDto
         {
-            return new Error(AuthErrorCodes.Conflict, "Такой провайдер уже привязан к другому аккаунту.");
-        }
-
-        _db.UserAuthProviders.Add(
-            new UserAuthProvider
-            {
-                Id = Guid.NewGuid(),
-                UserId = userId,
-                ProviderKind = kind,
-                ProviderKey = providerKey,
-                CreatedAtUtc = DateTime.UtcNow,
-            });
-        await _db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        return null;
-    }
-
-    private async Task<AuthTokensDto> IssueTokensAsync(ApplicationUser user, CancellationToken cancellationToken)
-    {
-        var roles = await _userManager.GetRolesAsync(user).ConfigureAwait(false);
-        var access = CreateAccessToken(user, roles);
-        var refreshPlain = CreateOpaqueRefreshToken();
-        var refreshHash = Sha256(refreshPlain);
-
-        var refreshDays = _jwt.RefreshTokenDays > 0 ? _jwt.RefreshTokenDays : 14;
-        _db.RefreshTokens.Add(
-            new RefreshToken
-            {
-                Id = Guid.NewGuid(),
-                UserId = user.Id,
-                TokenHash = refreshHash,
-                ExpiresAtUtc = DateTime.UtcNow.AddDays(refreshDays),
-                CreatedAtUtc = DateTime.UtcNow,
-                CreatedByIp = ClientIp(),
-            });
-
-        await _db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-        return new AuthTokensDto
-        {
-            AccessToken = access,
-            RefreshToken = refreshPlain,
-            User = MapUser(user, roles),
+            Id = user.Id.ToString(),
+            Email = user.Email,
+            FirstName = user.FirstName ?? string.Empty,
+            LastName = user.LastName,
+            Role = role,
+            AvatarUrl = user.AvatarUrl,
         };
     }
 
-    private async Task<AuthTokensDto?> TryRefreshTokensAsync(string refreshToken, CancellationToken cancellationToken)
-    {
-        var hash = Sha256(refreshToken);
-        var existing = await _db
-            .RefreshTokens.FirstOrDefaultAsync(x => x.TokenHash == hash, cancellationToken)
-            .ConfigureAwait(false);
-
-        if (existing is null || existing.RevokedAtUtc is not null || existing.ExpiresAtUtc < DateTime.UtcNow)
-        {
-            return null;
-        }
-
-        var user = await _userManager.FindByIdAsync(existing.UserId.ToString()).ConfigureAwait(false);
-        if (user is null)
-        {
-            return null;
-        }
-
-        existing.RevokedAtUtc = DateTime.UtcNow;
-
-        var refreshDays = _jwt.RefreshTokenDays > 0 ? _jwt.RefreshTokenDays : 14;
-        var refreshPlain = CreateOpaqueRefreshToken();
-        _db.RefreshTokens.Add(
-            new RefreshToken
-            {
-                Id = Guid.NewGuid(),
-                UserId = user.Id,
-                TokenHash = Sha256(refreshPlain),
-                ExpiresAtUtc = DateTime.UtcNow.AddDays(refreshDays),
-                CreatedAtUtc = DateTime.UtcNow,
-                CreatedByIp = ClientIp(),
-            });
-
-        await _db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-        var roles = await _userManager.GetRolesAsync(user).ConfigureAwait(false);
-        return new AuthTokensDto
-        {
-            AccessToken = CreateAccessToken(user, roles),
-            RefreshToken = refreshPlain,
-            User = MapUser(user, roles),
-        };
-    }
-
-    private async Task RevokeSingleRefreshAsync(string refreshToken, CancellationToken cancellationToken)
-    {
-        var hash = Sha256(refreshToken);
-        var existing = await _db.RefreshTokens.FirstOrDefaultAsync(x => x.TokenHash == hash, cancellationToken)
-            .ConfigureAwait(false);
-        if (existing is null || existing.RevokedAtUtc is not null)
-        {
-            return;
-        }
-
-        existing.RevokedAtUtc = DateTime.UtcNow;
-        await _db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-    }
-
-    private async Task RevokeAllRefreshForUserAsync(Guid userId, CancellationToken cancellationToken)
-    {
-        var tokens = await _db
-            .RefreshTokens.Where(x => x.UserId == userId && x.RevokedAtUtc == null)
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
-
-        var now = DateTime.UtcNow;
-        foreach (var t in tokens)
-        {
-            t.RevokedAtUtc = now;
-        }
-
-        if (tokens.Count > 0)
-        {
-            await _db.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-        }
-    }
+    private static byte[] Sha256(string value) => SHA256.HashData(Encoding.UTF8.GetBytes(value));
 
     private string? ClientIp() => _httpContextAccessor?.HttpContext?.Connection.RemoteIpAddress?.ToString();
 
     private string CreateAccessToken(ApplicationUser user, IList<string> roles)
     {
-        var minutes = _jwt.AccessTokenMinutes > 0 ? _jwt.AccessTokenMinutes : 60;
+        var minutes = _jwtOptions.AccessTokenMinutes > 0 ? _jwtOptions.AccessTokenMinutes : 60;
         var expires = DateTime.UtcNow.AddMinutes(minutes);
 
         var claims = new List<Claim>
@@ -454,12 +333,12 @@ public class AuthAccountService : IAuthAccountService
             claims.Add(new Claim(ClaimTypes.Role, role));
         }
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwt.SigningKey));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.SigningKey));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(
-            issuer: _jwt.Issuer,
-            audience: _jwt.Audience,
+            issuer: _jwtOptions.Issuer,
+            audience: _jwtOptions.Audience,
             claims: claims,
             notBefore: DateTime.UtcNow,
             expires: expires,
@@ -468,29 +347,148 @@ public class AuthAccountService : IAuthAccountService
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
-    private static AuthUserDto MapUser(ApplicationUser user, IList<string> roles)
+    private async Task<AuthTokensDto> IssueTokensAsync(ApplicationUser user, CancellationToken cancellationToken)
     {
-        var role = roles.FirstOrDefault() ?? "user";
-        return new AuthUserDto
+        var roles = await _userManager.GetRolesAsync(user).ConfigureAwait(false);
+        var access = CreateAccessToken(user, roles);
+        var refreshPlain = CreateOpaqueRefreshToken();
+        var refreshHash = Sha256(refreshPlain);
+
+        var refreshDays = _jwtOptions.RefreshTokenDays > 0 ? _jwtOptions.RefreshTokenDays : 14;
+        _dataContext.RefreshTokens.Add(
+            new RefreshToken
+            {
+                Id = Guid.NewGuid(),
+                UserId = user.Id,
+                TokenHash = refreshHash,
+                ExpiresAtUtc = DateTime.UtcNow.AddDays(refreshDays),
+                CreatedAtUtc = DateTime.UtcNow,
+                CreatedByIp = ClientIp(),
+            });
+
+        await _dataContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+        return new AuthTokensDto
         {
-            Id = user.Id.ToString(),
-            Email = user.Email,
-            FirstName = user.FirstName ?? string.Empty,
-            LastName = user.LastName,
-            Role = role,
-            AvatarUrl = user.AvatarUrl,
+            AccessToken = access,
+            RefreshToken = refreshPlain,
+            User = MapUser(user, roles),
         };
     }
 
-    private static string CreateOpaqueRefreshToken()
+    private async Task RevokeAllRefreshForUserAsync(Guid userId, CancellationToken cancellationToken)
     {
-        Span<byte> buffer = stackalloc byte[64];
-        RandomNumberGenerator.Fill(buffer);
-        return Convert.ToBase64String(buffer)
-            .Replace("+", "-", StringComparison.Ordinal)
-            .Replace("/", "_", StringComparison.Ordinal)
-            .TrimEnd('=');
+        var tokens = await _dataContext
+            .RefreshTokens.Where(x => x.UserId == userId && x.RevokedAtUtc == null)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        var now = DateTime.UtcNow;
+        foreach (var t in tokens)
+        {
+            t.RevokedAtUtc = now;
+        }
+
+        if (tokens.Count > 0)
+        {
+            await _dataContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        }
     }
 
-    private static byte[] Sha256(string value) => SHA256.HashData(Encoding.UTF8.GetBytes(value));
+    private async Task RevokeSingleRefreshAsync(string refreshToken, CancellationToken cancellationToken)
+    {
+        var hash = Sha256(refreshToken);
+        var existing = await _dataContext.RefreshTokens.FirstOrDefaultAsync(x => x.TokenHash == hash, cancellationToken)
+            .ConfigureAwait(false);
+        if (existing is null || existing.RevokedAtUtc is not null)
+        {
+            return;
+        }
+
+        existing.RevokedAtUtc = DateTime.UtcNow;
+        await _dataContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task<Error?> TryAddAuthProviderExclusiveAsync(
+       Guid userId,
+       AuthProviderKind kind,
+       string providerKey,
+       CancellationToken cancellationToken)
+    {
+        var exists = await _dataContext.UserAuthProviders.AnyAsync(
+                x => x.ProviderKind == kind && x.ProviderKey == providerKey,
+                cancellationToken)
+            .ConfigureAwait(false);
+        if (exists)
+        {
+            return new Error(AuthErrorCodes.Conflict, "Такой провайдер уже привязан к другому аккаунту.");
+        }
+
+        _dataContext.UserAuthProviders.Add(
+            new UserAuthProvider
+            {
+                Id = Guid.NewGuid(),
+                UserId = userId,
+                ProviderKind = kind,
+                ProviderKey = providerKey,
+                CreatedAtUtc = DateTime.UtcNow,
+            });
+        await _dataContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        return null;
+    }
+
+    private async Task<AuthTokensDto?> TryRefreshTokensAsync(string refreshToken, CancellationToken cancellationToken)
+    {
+        var hash = Sha256(refreshToken);
+        var existing = await _dataContext
+            .RefreshTokens.FirstOrDefaultAsync(x => x.TokenHash == hash, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (existing is null || existing.RevokedAtUtc is not null || existing.ExpiresAtUtc < DateTime.UtcNow)
+        {
+            return null;
+        }
+
+        var user = await _userManager.FindByIdAsync(existing.UserId.ToString()).ConfigureAwait(false);
+        if (user is null)
+        {
+            return null;
+        }
+
+        existing.RevokedAtUtc = DateTime.UtcNow;
+
+        var refreshDays = _jwtOptions.RefreshTokenDays > 0 ? _jwtOptions.RefreshTokenDays : 14;
+        var refreshPlain = CreateOpaqueRefreshToken();
+        _dataContext.RefreshTokens.Add(
+            new RefreshToken
+            {
+                Id = Guid.NewGuid(),
+                UserId = user.Id,
+                TokenHash = Sha256(refreshPlain),
+                ExpiresAtUtc = DateTime.UtcNow.AddDays(refreshDays),
+                CreatedAtUtc = DateTime.UtcNow,
+                CreatedByIp = ClientIp(),
+            });
+
+        await _dataContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+        var roles = await _userManager.GetRolesAsync(user).ConfigureAwait(false);
+        return new AuthTokensDto
+        {
+            AccessToken = CreateAccessToken(user, roles),
+            RefreshToken = refreshPlain,
+            User = MapUser(user, roles),
+        };
+    }
+
+    private Error? ValidateTelegramBotConfigured()
+    {
+        if (string.IsNullOrWhiteSpace(_telegramOptions.BotToken)
+            || _telegramOptions.BotToken.Contains("PASTE", StringComparison.OrdinalIgnoreCase))
+        {
+            return new Error(AuthErrorCodes.TelegramNotConfigured, "Telegram BotToken не настроен.");
+        }
+
+        return null;
+    }
 }
