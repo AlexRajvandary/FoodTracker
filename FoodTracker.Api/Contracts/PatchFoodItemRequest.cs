@@ -2,10 +2,11 @@ namespace FoodTracker.Api.Contracts;
 
 public sealed class PatchFoodItemRequest
 {
-    public string? Name { get; init; }
-    public string? Description { get; init; }
-    public decimal? CaloriesPer100g { get; init; }
-    public decimal? ProteinsPer100g { get; init; }
-    public decimal? FatsPer100g { get; init; }
-    public decimal? CarbsPer100g { get; init; }
+    public string? Name { get; set; }
+    public string? Category { get; set; }
+    public string? Description { get; set; }
+    public decimal? CaloriesPer100g { get; set; }
+    public decimal? ProteinsPer100g { get; set; }
+    public decimal? FatsPer100g { get; set; }
+    public decimal? CarbsPer100g { get; set; }
 }

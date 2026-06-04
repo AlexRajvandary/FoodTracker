@@ -36,10 +36,10 @@ public class FoodsController : ControllerBase
 
     [HttpPost]
     [Authorize(Roles = "admin")]
-    [ProducesResponseType(typeof(FoodItemDto), StatusCodes.Status202Accepted)]
+    [ProducesResponseType(typeof(FoodItemDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<IActionResult> CreateFoodItem([FromBody] CreateFoodItemRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> Create([FromBody] CreateFoodItemRequest request, CancellationToken cancellationToken)
     {
         if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId))
         {
@@ -59,7 +59,7 @@ public class FoodsController : ControllerBase
         };
 
         var result = await _mediator.Send(command, cancellationToken).ConfigureAwait(false);
-        return result.ToAuthActionResult(dto => new ObjectResult(dto) { StatusCode = StatusCodes.Status202Accepted });
+        return result.ToAuthActionResult(Ok);
     }
 
     [HttpDelete("{foodItemId:guid}")]
@@ -68,7 +68,7 @@ public class FoodsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> DeleteFoodItem(Guid foodItemId, CancellationToken cancellationToken)
+    public async Task<IActionResult> Delete(Guid foodItemId, CancellationToken cancellationToken)
     {
         if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId))
         {
@@ -83,7 +83,7 @@ public class FoodsController : ControllerBase
 
         var result = await _mediator.Send(command, cancellationToken).ConfigureAwait(false);
 
-        return result.ToAuthActionResult(() => NoContent());
+        return result.ToAuthActionResult(NoContent);
     }
 
     /// <summary>
@@ -92,15 +92,18 @@ public class FoodsController : ControllerBase
     [HttpPatch("{foodItemId:guid}")]
     [Authorize(Roles = "admin")]
     [ProducesResponseType(typeof(FoodItemDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> PatchFoodItem(Guid foodItemId, [FromBody] PatchFoodItemRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> Patch(Guid foodItemId, [FromBody] PatchFoodItemRequest request, CancellationToken cancellationToken)
     {
         if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId))
         {
             return Unauthorized();
         }
+
+        if (request == null) return BadRequest();
 
         var command = new PatchFoodItemCommand
         {
@@ -131,7 +134,7 @@ public class FoodsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> UpdateFoodItem(Guid foodItemId, [FromBody] UpdateFoodItemRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> Update(Guid foodItemId, [FromBody] UpdateFoodItemRequest request, CancellationToken cancellationToken)
     {
         if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId))
         {
