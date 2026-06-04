@@ -6,7 +6,6 @@ namespace FoodTracker.Infrastructure.Persistence.Repositories;
 
 public class FoodItemRepository : IFoodItemRepository
 {
-    private const int DefaultTake = 100;
     private readonly DataContext _dataContext;
 
     public FoodItemRepository(DataContext db)
@@ -47,6 +46,8 @@ public class FoodItemRepository : IFoodItemRepository
     public async Task<IReadOnlyList<FoodItem>> ListCatalogAsync(
        string? query,
        string? category,
+       int page,
+       int pageSize,
        CancellationToken cancellationToken)
     {
         var foodItems = _dataContext
@@ -66,7 +67,8 @@ public class FoodItemRepository : IFoodItemRepository
 
         return await foodItems
             .OrderBy(x => x.Name)
-            .Take(DefaultTake)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
     }

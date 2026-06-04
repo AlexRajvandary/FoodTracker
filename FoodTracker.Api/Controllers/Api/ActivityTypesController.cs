@@ -1,6 +1,7 @@
 using FoodTracker.Api.Contracts;
 using FoodTracker.Api.Extensions;
 using FoodTracker.Application.Features.Activities;
+using FoodTracker.Domain.Common.Results;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -22,13 +23,27 @@ public class ActivityTypesController : ControllerBase
 
     [HttpGet("catalog")]
     [Authorize(Roles = "admin, user")]
-    [ProducesResponseType(typeof(IReadOnlyList<ActivityTypeDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PagedList<ActivityTypeDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<IActionResult> Catalog([FromQuery] string? query, [FromQuery] string? category, CancellationToken cancellationToken)
+    public async Task<IActionResult> Catalog([FromQuery] string? query,
+                                             [FromQuery] string? category,
+                                             [FromQuery] int? page,
+                                             [FromQuery] int? pageSize,
+                                             CancellationToken cancellationToken)
     {
+        if (page is null or < 1)
+        {
+            page = 1;
+        }
+
+        if (pageSize is null or < 1)
+        {
+            pageSize = 10;
+        }
+
         var result = await _mediator
-            .Send(new ListActivityTypesQuery { Query = query, Category = category }, cancellationToken)
+            .Send(new ListActivityTypesQuery { Query = query, Category = category, Page = page, PageSize = pageSize }, cancellationToken)
             .ConfigureAwait(false);
 
         return Ok(result);

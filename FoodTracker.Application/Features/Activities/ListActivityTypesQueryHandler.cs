@@ -4,7 +4,7 @@ using MediatR;
 
 namespace FoodTracker.Application.Features.Activities;
 
-public sealed class ListActivityTypesQueryHandler : IRequestHandler<ListActivityTypesQuery, Result<IReadOnlyList<ActivityTypeDto>>>
+public sealed class ListActivityTypesQueryHandler : IRequestHandler<ListActivityTypesQuery, Result<PagedList<ActivityTypeDto>>>
 {
     private readonly IActivityTypeRepository _types;
 
@@ -13,9 +13,10 @@ public sealed class ListActivityTypesQueryHandler : IRequestHandler<ListActivity
         _types = types;
     }
 
-    public async Task<Result<IReadOnlyList<ActivityTypeDto>>> Handle(ListActivityTypesQuery request, CancellationToken cancellationToken)
+    public async Task<Result<PagedList<ActivityTypeDto>>> Handle(ListActivityTypesQuery request, CancellationToken cancellationToken)
     {
-        var list = await _types.ListCatalogAsync(request.Query, request.Category, cancellationToken).ConfigureAwait(false);
-        return Result<IReadOnlyList<ActivityTypeDto>>.Success(list.Select(x => x.ToDto()).ToList());
+        var list = await _types.ListCatalogAsync(request.Query, request.Category, request.Page ?? 1, request.PageSize ?? 10, cancellationToken).ConfigureAwait(false);
+        var dtos = list.Select(x => x.ToDto()).ToList();
+        return Result<PagedList<ActivityTypeDto>>.Success(new PagedList<ActivityTypeDto>(dtos, request.Page ?? 1, request.PageSize ?? 10));
     }
 }

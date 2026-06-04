@@ -8,5 +8,5 @@ public interface IActivityTypeRepository
     Task DeleteAsync(ActivityType activityType, CancellationToken cancellationToken);
     Task<ActivityType?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
     Task<ActivityType?> GetByIdAsNoTrackingAsync(Guid id, CancellationToken cancellationToken);
-    Task<IReadOnlyList<ActivityType>> ListCatalogAsync(string? query, string? category, CancellationToken cancellationToken);
+    Task<IReadOnlyList<ActivityType>> ListCatalogAsync(string? query, string? category, int page, int pageSize, CancellationToken cancellationToken);
 }

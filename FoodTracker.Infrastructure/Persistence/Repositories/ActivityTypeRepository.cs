@@ -37,7 +37,7 @@ public class ActivityTypeRepository : IActivityTypeRepository
         return await _dataContext.ActivityTypes.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id, cancellationToken).ConfigureAwait(false);
     }
 
-    public async Task<IReadOnlyList<ActivityType>> ListCatalogAsync(string? query, string? category, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<ActivityType>> ListCatalogAsync(string? query, string? category, int page, int pageSize, CancellationToken cancellationToken)
     {
         var q = _dataContext.ActivityTypes.AsNoTracking();
 
@@ -54,7 +54,8 @@ public class ActivityTypeRepository : IActivityTypeRepository
 
         return await q
             .OrderBy(activity => activity.Name)
-            .Take(DefaultTake)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
     }
