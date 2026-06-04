@@ -10,6 +10,7 @@ internal static class ActivityMapper
             Id = x.Id,
             Name = x.Name,
             Description = x.Description,
+            Category = x.Category,
             CaloriesPerHour = x.CaloriesPerHour,
             CaloriesPer100Reps = x.CaloriesPer100Reps,
         };

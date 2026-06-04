@@ -71,24 +71,5 @@ public class FoodItemRepository : IFoodItemRepository
             .ConfigureAwait(false);
     }
 
-    public async Task<IReadOnlyList<FoodItem>> SearchByNameAsync(string query, CancellationToken cancellationToken)
-    {
-        if (query.Length == 0)
-        {
-            return [];
-        }
-
-        query = query.Trim();
-        var pattern = "%" + EscapeLike(query) + "%";
-        return await _dataContext
-            .FoodItems
-            .AsNoTracking()
-            .Where(x => EF.Functions.ILike(x.Name, pattern))
-            .OrderBy(x => x.Name)
-            .Take(DefaultTake)
-            .ToListAsync(cancellationToken)
-            .ConfigureAwait(false);
-    }
-
     private static string EscapeLike(string value) => value.Replace("\\", "\\\\", StringComparison.Ordinal).Replace("%", "\\%", StringComparison.Ordinal).Replace("_", "\\_", StringComparison.Ordinal);
 }

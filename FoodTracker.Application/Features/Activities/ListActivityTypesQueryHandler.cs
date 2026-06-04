@@ -15,7 +15,7 @@ public sealed class ListActivityTypesQueryHandler : IRequestHandler<ListActivity
 
     public async Task<Result<IReadOnlyList<ActivityTypeDto>>> Handle(ListActivityTypesQuery request, CancellationToken cancellationToken)
     {
-        var list = await _types.ListOrSearchAsync(request.Query, cancellationToken).ConfigureAwait(false);
+        var list = await _types.ListCatalogAsync(request.Query, request.Category, cancellationToken).ConfigureAwait(false);
         return Result<IReadOnlyList<ActivityTypeDto>>.Success(list.Select(x => x.ToDto()).ToList());
     }
 }

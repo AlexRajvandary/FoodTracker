@@ -1,5 +1,4 @@
 using FoodTracker.Api.Middleware;
-using Microsoft.AspNetCore.Builder;
 
 namespace FoodTracker.Api.Extensions;
 
