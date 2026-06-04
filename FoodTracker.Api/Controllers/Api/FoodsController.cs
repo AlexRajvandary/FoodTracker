@@ -86,9 +86,6 @@ public class FoodsController : ControllerBase
         return result.ToAuthActionResult(NoContent);
     }
 
-    /// <summary>
-    /// Provide a value to update the field. Set to <c>null</c> to leave the corresponding field unchanged.
-    /// </summary>
     [HttpPatch("{foodItemId:guid}")]
     [Authorize(Roles = "admin")]
     [ProducesResponseType(typeof(FoodItemDto), StatusCodes.Status200OK)]
@@ -119,13 +116,6 @@ public class FoodsController : ControllerBase
 
         var result = await _mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return result.ToAuthActionResult(Ok);
-    }
-
-    [HttpGet("search")]
-    public async Task<IActionResult> Search([FromQuery] string query, CancellationToken cancellationToken)
-    {
-        var result = await _mediator.Send(new SearchFoodItemsQuery { Query = query }, cancellationToken).ConfigureAwait(false);
-        return result.ToAuthActionResult();
     }
 
     [HttpPut("{foodItemId:guid}")]
