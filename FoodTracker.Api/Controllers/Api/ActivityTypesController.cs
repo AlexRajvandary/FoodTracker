@@ -29,7 +29,7 @@ public class ActivityTypesController : ControllerBase
     public async Task<IActionResult> Catalog([FromQuery] string? query, [FromQuery] string? category, CancellationToken cancellationToken)
     {
         var result = await _mediator
-            .Send(new ListFoodCatalogQuery { Query = query, Category = category }, cancellationToken)
+            .Send(new ListActivityTypesQuery { Query = query, Category = category }, cancellationToken)
             .ConfigureAwait(false);
 
         return Ok(result);
@@ -37,7 +37,7 @@ public class ActivityTypesController : ControllerBase
 
     [HttpPost]
     [Authorize(Roles = "admin")]
-    [ProducesResponseType(typeof(FoodItemDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ActivityTypeDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> Create([FromBody] CreateActivityTypeRequest request, CancellationToken cancellationToken)
