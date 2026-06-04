@@ -3,7 +3,7 @@ using MediatR;
 
 namespace FoodTracker.Application.Features.Activities;
 
-public sealed class ListActivityTypesQuery : IRequest<Result<PagedList<ActivityTypeDto>>>
+public sealed class ListActivityTypesQuery : IRequest<Result<PagedList<ActivityTypeShortDto>>>
 {
     public string? Query { get; init; }
     public string? Category { get; init; }

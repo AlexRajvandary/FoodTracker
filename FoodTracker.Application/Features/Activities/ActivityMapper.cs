@@ -1,29 +1,29 @@
+using FoodTracker.Application.Features.Activities;
 using FoodTracker.Domain.Activities;
 
-namespace FoodTracker.Application.Features.Activities;
+namespace FoodTracker.Application.Features.Nutrition;
 
 internal static class ActivityMapper
 {
-    public static ActivityTypeDto ToDto(this ActivityType x) =>
-        new()
-        {
-            Id = x.Id,
-            Name = x.Name,
-            Description = x.Description,
-            Category = x.Category,
-            CaloriesPerHour = x.CaloriesPerHour,
-            CaloriesPer100Reps = x.CaloriesPer100Reps,
-        };
+    public static ActivityTypeShortDto ToShortDto(this ActivityType activityType) =>
+    new()
+    {
+        Id = activityType.Id,
+        Name = activityType.Name,
+        Category = activityType.Category,
+        CaloriesPer100Reps = activityType.CaloriesPer100Reps,
+        CaloriesPerHour = activityType.CaloriesPerHour
+    };
 
-    public static ActivityEntryDto ToDto(this ActivityEntry x) =>
-        new()
-        {
-            Id = x.Id,
-            ActivityTypeId = x.ActivityTypeId,
-            ActivityName = x.ActivityName,
-            OccurredAt = x.OccurredAtUtc,
-            DurationMinutes = x.DurationMinutes,
-            RepetitionsCount = x.RepetitionsCount,
-            CaloriesBurned = x.CaloriesBurned,
-        };
+
+    public static ActivityTypeDto ToDto(this ActivityType activityType) =>
+    new()
+    {
+        Id = activityType.Id,
+        Name = activityType.Name,
+        Category = activityType.Category,
+        CaloriesPer100Reps = activityType.CaloriesPer100Reps,
+        CaloriesPerHour = activityType.CaloriesPerHour,
+        Description = activityType.Description
+    };
 }

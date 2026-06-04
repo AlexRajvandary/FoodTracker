@@ -4,7 +4,7 @@ using MediatR;
 
 namespace FoodTracker.Application.Features.Nutrition;
 
-public sealed class ListFoodCatalogQueryHandler : IRequestHandler<ListFoodCatalogQuery, Result<PagedList<FoodItemDto>>>
+public sealed class ListFoodCatalogQueryHandler : IRequestHandler<ListFoodCatalogQuery, Result<PagedList<ShortFoodItemDto>>>
 {
     private static readonly HashSet<string> AllowedCategories =
     [
@@ -24,16 +24,16 @@ public sealed class ListFoodCatalogQueryHandler : IRequestHandler<ListFoodCatalo
         _foodItems = items;
     }
 
-    public async Task<Result<PagedList<FoodItemDto>>> Handle(ListFoodCatalogQuery request, CancellationToken cancellationToken)
+    public async Task<Result<PagedList<ShortFoodItemDto>>> Handle(ListFoodCatalogQuery request, CancellationToken cancellationToken)
     {
         if (!string.IsNullOrWhiteSpace(request.Category) && !AllowedCategories.Contains(request.Category))
         {
-            return Result<PagedList<FoodItemDto>>.Failure(
+            return Result<PagedList<ShortFoodItemDto>>.Failure(
                 new Error(FoodErrorCodes.InvalidCategory, "Неизвестная категория."));
         }
 
         var list = await _foodItems.ListCatalogAsync(request.Query, request.Category, request.Page ?? 1, request.PageSize ?? 10, cancellationToken).ConfigureAwait(false);
-        var dto = list.Select(x => x.ToDto()).ToList();
-        return Result<PagedList<FoodItemDto>>.Success(new PagedList<FoodItemDto>(dto, request.Page ?? 1, request.PageSize ?? 10));
+        var dto = list.Select(x => x.ToShortDto()).ToList();
+        return Result<PagedList<ShortFoodItemDto>>.Success(new PagedList<ShortFoodItemDto>(dto, request.Page ?? 1, request.PageSize ?? 10));
     }
 }

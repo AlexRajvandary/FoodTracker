@@ -23,7 +23,7 @@ public class FoodsController : ControllerBase
 
     [HttpGet("catalog")]
     [Authorize(Roles = "admin, user")]
-    [ProducesResponseType(typeof(PagedList<FoodItemDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PagedList<ShortFoodItemDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> Catalog([FromQuery] string? query, [FromQuery] string? category, [FromQuery] int? page, [FromQuery] int? pageSize, CancellationToken cancellationToken)
@@ -96,6 +96,26 @@ public class FoodsController : ControllerBase
 
         return result.ToAuthActionResult(NoContent);
     }
+
+    [HttpGet("{foodItemId:guid}")]
+    [Authorize(Roles = "admin, user")]
+    [ProducesResponseType(typeof(FoodItemDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Get(Guid foodItemId, CancellationToken cancellationToken)
+    {
+        if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId))
+        {
+            return Unauthorized();
+        }
+        var query = new GetFoodItemQuery
+        {
+            FoodItemId = foodItemId
+        };
+        var result = await _mediator.Send(query, cancellationToken).ConfigureAwait(false);
+        return result.ToAuthActionResult(Ok);
+    }   
 
     [HttpPatch("{foodItemId:guid}")]
     [Authorize(Roles = "admin")]

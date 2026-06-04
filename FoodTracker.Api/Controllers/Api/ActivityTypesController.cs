@@ -23,7 +23,7 @@ public class ActivityTypesController : ControllerBase
 
     [HttpGet("catalog")]
     [Authorize(Roles = "admin, user")]
-    [ProducesResponseType(typeof(PagedList<ActivityTypeDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PagedList<ActivityTypeShortDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> Catalog([FromQuery] string? query,
@@ -95,6 +95,18 @@ public class ActivityTypesController : ControllerBase
 
         var result = await _mediator.Send(command, cancellationToken).ConfigureAwait(false);
         return result.ToAuthActionResult(NoContent);
+    }
+
+    [HttpGet("{activityTypeId:guid}")]
+    [Authorize(Roles = "admin, user")]
+    [ProducesResponseType(typeof(ActivityTypeDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Get(Guid activityTypeId, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new GetActivityTypeQuery { ActivityTypeId = activityTypeId }, cancellationToken).ConfigureAwait(false);
+        return result.ToAuthActionResult(Ok);
     }
 
     [HttpPatch("{activityTypeId:guid}")]
