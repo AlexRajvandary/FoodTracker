@@ -17,11 +17,11 @@ public sealed class ListFoodCatalogQueryHandler : IRequestHandler<ListFoodCatalo
         "овощи",
     ];
 
-    private readonly IFoodItemRepository _items;
+    private readonly IFoodItemRepository _foodItems;
 
     public ListFoodCatalogQueryHandler(IFoodItemRepository items)
     {
-        _items = items;
+        _foodItems = items;
     }
 
     public async Task<Result<IReadOnlyList<FoodItemDto>>> Handle(ListFoodCatalogQuery request, CancellationToken cancellationToken)
@@ -32,8 +32,8 @@ public sealed class ListFoodCatalogQueryHandler : IRequestHandler<ListFoodCatalo
                 new Error(FoodErrorCodes.InvalidCategory, "Неизвестная категория."));
         }
 
-        var list = await _items.ListCatalogAsync(request.Query, request.Category, cancellationToken).ConfigureAwait(false);
-        var dto = list.Where(x => !string.IsNullOrEmpty(x.Category)).Select(x => x.ToDto()).ToList();
+        var list = await _foodItems.ListCatalogAsync(request.Query, request.Category, cancellationToken).ConfigureAwait(false);
+        var dto = list.Select(x => x.ToDto()).ToList();
         return Result<IReadOnlyList<FoodItemDto>>.Success(dto);
     }
 }

@@ -31,6 +31,14 @@ public class FoodItemRepository : IFoodItemRepository
     {
         return await _dataContext
             .FoodItems
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    public async Task<FoodItem?> GetByIdAsNoTrackingAsync(Guid id, CancellationToken cancellationToken)
+    {
+        return await _dataContext
+            .FoodItems
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken)
             .ConfigureAwait(false);
@@ -43,8 +51,7 @@ public class FoodItemRepository : IFoodItemRepository
     {
         var foodItems = _dataContext
             .FoodItems
-            .AsNoTracking()
-            .Where(x => x.Category != null);
+            .AsNoTracking();
 
         if (!string.IsNullOrWhiteSpace(category))
         {

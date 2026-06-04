@@ -39,7 +39,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IFoodEntryRepository, FoodEntryRepository>();
         services.AddScoped<IActivityTypeRepository, ActivityTypeRepository>();
         services.AddScoped<IActivityEntryRepository, ActivityEntryRepository>();
-
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
         services
             .AddIdentityCore<ApplicationUser>(options =>
             {

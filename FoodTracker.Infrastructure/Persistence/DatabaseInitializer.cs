@@ -10,7 +10,7 @@ namespace FoodTracker.Infrastructure.Persistence;
 /// <summary>Идемпотентное наполнение локальной БД (только Development).</summary>
 public static class DatabaseInitializer
 {
-    private const string TestEmail = "test@example.com";
+    private const string TestEmail = "testadmin@example.com";
     private const string TestPassword = "testtest";
 
     public static async Task EnsureTestUserAsync(
@@ -66,9 +66,9 @@ public static class DatabaseInitializer
         DataContext db,
         CancellationToken cancellationToken)
     {
-        if (!await userManager.IsInRoleAsync(user, "user").ConfigureAwait(false))
+        if (!await userManager.IsInRoleAsync(user, "admin").ConfigureAwait(false))
         {
-            var roleAdd = await userManager.AddToRoleAsync(user, "user").ConfigureAwait(false);
+            var roleAdd = await userManager.AddToRoleAsync(user, "admin").ConfigureAwait(false);
             if (!roleAdd.Succeeded)
             {
                 throw new InvalidOperationException(

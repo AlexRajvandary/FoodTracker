@@ -21,8 +21,10 @@ public class FoodsController : ControllerBase
     }
 
     [HttpGet("catalog")]
-    [Authorize(Roles = "User")]
+    [Authorize(Roles = "admin, user")]
     [ProducesResponseType(typeof(IReadOnlyList<FoodItemDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> Catalog([FromQuery] string? query, [FromQuery] string? category, CancellationToken cancellationToken)
     {
         var result = await _mediator
@@ -33,9 +35,10 @@ public class FoodsController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "admin")]
     [ProducesResponseType(typeof(FoodItemDto), StatusCodes.Status202Accepted)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> CreateFoodItem([FromBody] CreateFoodItemRequest request, CancellationToken cancellationToken)
     {
         if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId))
@@ -60,9 +63,10 @@ public class FoodsController : ControllerBase
     }
 
     [HttpDelete("{foodItemId:guid}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteFoodItem(Guid foodItemId, CancellationToken cancellationToken)
     {
@@ -82,10 +86,14 @@ public class FoodsController : ControllerBase
         return result.ToAuthActionResult(() => NoContent());
     }
 
+    /// <summary>
+    /// Provide a value to update the field. Set to <c>null</c> to leave the corresponding field unchanged.
+    /// </summary>
     [HttpPatch("{foodItemId:guid}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "admin")]
     [ProducesResponseType(typeof(FoodItemDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> PatchFoodItem(Guid foodItemId, [FromBody] PatchFoodItemRequest request, CancellationToken cancellationToken)
     {
@@ -118,9 +126,10 @@ public class FoodsController : ControllerBase
     }
 
     [HttpPut("{foodItemId:guid}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "admin")]
     [ProducesResponseType(typeof(FoodItemDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateFoodItem(Guid foodItemId, [FromBody] UpdateFoodItemRequest request, CancellationToken cancellationToken)
     {
