@@ -1,20 +1,68 @@
+using FoodTracker.Application.Abstractions.Persistence;
+using FoodTracker.Application.Abstractions.Services;
+using FoodTracker.Application.Configuration;
+using FoodTracker.Infrastructure.Identity;
+using FoodTracker.Infrastructure.Persistence;
+using FoodTracker.Infrastructure.Persistence.Repositories;
+using FoodTracker.Infrastructure.Services;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace FoodTracker.Infrastructure.DependencyInjection;
 
 public static class ServiceCollectionExtensions
 {
-    /// <summary>
-    /// Infrastructure module registration (scaffolding only).
-    /// </summary>
-    public static IServiceCollection AddFoodTrackerInfrastructure(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddFoodTrackerInfrastructure(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        IHostEnvironment hostEnvironment)
     {
-        // TODO: Register EF Core DbContext, repositories, and other infrastructure services.
-        // Connection string placeholder:
-        _ = configuration.GetConnectionString("PostgreSql");
+        ArgumentNullException.ThrowIfNull(configuration);
+        ArgumentNullException.ThrowIfNull(hostEnvironment);
+        var connectionString = configuration.GetConnectionString("PostgreSql");
+        if (string.IsNullOrWhiteSpace(connectionString))
+        {
+            throw new InvalidOperationException("Connection string 'PostgreSql' is not configured.");
+        }
+
+        services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
+        services.Configure<TelegramAuthOptions>(configuration.GetSection(TelegramAuthOptions.SectionName));
+        services.AddHttpContextAccessor();
+        services.AddScoped<IAuthAccountService, AuthAccountService>();
+
+        services.AddDbContext<DataContext>(options => options.UseNpgsql(connectionString));
+
+        services.AddScoped<IFoodItemRepository, FoodItemRepository>();
+        services.AddScoped<IFoodEntryRepository, FoodEntryRepository>();
+        services.AddScoped<IActivityTypeRepository, ActivityTypeRepository>();
+        services.AddScoped<IActivityEntryRepository, ActivityEntryRepository>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services
+            .AddIdentityCore<ApplicationUser>(options =>
+            {
+                options.Password.RequiredLength = 8;
+                if (hostEnvironment.IsDevelopment())
+                {
+                    options.Password.RequireDigit = false;
+                    options.Password.RequireUppercase = false;
+                }
+                else
+                {
+                    options.Password.RequireDigit = true;
+                    options.Password.RequireUppercase = true;
+                }
+
+                options.Password.RequireLowercase = true;
+                options.Password.RequireNonAlphanumeric = false;
+                options.User.RequireUniqueEmail = true;
+                options.SignIn.RequireConfirmedEmail = false;
+            })
+            .AddRoles<IdentityRole<Guid>>()
+            .AddEntityFrameworkStores<DataContext>();
 
         return services;
     }
 }
-

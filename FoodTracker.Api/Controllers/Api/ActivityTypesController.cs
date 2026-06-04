@@ -1,0 +1,170 @@
+using FoodTracker.Api.Contracts;
+using FoodTracker.Api.Extensions;
+using FoodTracker.Application.Features.Activities;
+using FoodTracker.Domain.Common.Results;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+
+namespace FoodTracker.Api.Controllers.Api;
+
+[ApiController]
+[Route("api/activity-types")]
+[Authorize]
+public class ActivityTypesController : ControllerBase
+{
+    private readonly IMediator _mediator;
+
+    public ActivityTypesController(IMediator mediator)
+    {
+        _mediator = mediator;
+    }
+
+    [HttpGet("catalog")]
+    [Authorize(Roles = "admin, user")]
+    [ProducesResponseType(typeof(PagedList<ActivityTypeShortDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> Catalog([FromQuery] string? query,
+                                             [FromQuery] string? category,
+                                             [FromQuery] int? page,
+                                             [FromQuery] int? pageSize,
+                                             CancellationToken cancellationToken)
+    {
+        if (page is null or < 1)
+        {
+            page = 1;
+        }
+
+        if (pageSize is null or < 1)
+        {
+            pageSize = 10;
+        }
+
+        var result = await _mediator
+            .Send(new ListActivityTypesQuery { Query = query, Category = category, Page = page, PageSize = pageSize }, cancellationToken)
+            .ConfigureAwait(false);
+
+        return Ok(result);
+    }
+
+    [HttpPost]
+    [Authorize(Roles = "admin")]
+    [ProducesResponseType(typeof(ActivityTypeDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> Create([FromBody] CreateActivityTypeRequest request, CancellationToken cancellationToken)
+    {
+        if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId))
+        {
+            return Unauthorized();
+        }
+
+        var command = new CreateActivityTypeCommand
+        {
+            Name = request.Name,
+            Description = request.Description,
+            CaloriesPer100Reps = request.CaloriesPer100Reps,
+            CaloriesPerHour = request.CaloriesPerHour,
+            Category = request.Category
+        };
+
+        var result = await _mediator.Send(command, cancellationToken).ConfigureAwait(false);
+        return result.ToAuthActionResult(Ok);
+    }
+
+    [HttpDelete("{activityTypeId:guid}")]
+    [Authorize(Roles = "admin")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Delete(Guid activityTypeId, CancellationToken cancellationToken)
+    {
+        if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId))
+        {
+            return Unauthorized();
+        }
+
+        var command = new DeleteActivityTypeCommand
+        {
+            UserId = userId,
+            ActivityTypeId = activityTypeId
+        };
+
+        var result = await _mediator.Send(command, cancellationToken).ConfigureAwait(false);
+        return result.ToAuthActionResult(NoContent);
+    }
+
+    [HttpGet("{activityTypeId:guid}")]
+    [Authorize(Roles = "admin, user")]
+    [ProducesResponseType(typeof(ActivityTypeDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Get(Guid activityTypeId, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new GetActivityTypeQuery { ActivityTypeId = activityTypeId }, cancellationToken).ConfigureAwait(false);
+        return result.ToAuthActionResult(Ok);
+    }
+
+    [HttpPatch("{activityTypeId:guid}")]
+    [Authorize(Roles = "admin")]
+    [ProducesResponseType(typeof(ActivityTypeDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Patch(Guid activityTypeId, [FromBody] PatchActivityTypeRequest request, CancellationToken cancellationToken)
+    {
+        if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId))
+        {
+            return Unauthorized();
+        }
+
+        if (request == null) return BadRequest();
+
+        var command = new PatchActivityTypeCommand
+        {
+            UserId = userId,
+            ActivityTypeId = activityTypeId,
+            Name = request.Name,
+            Description = request.Description,
+            CaloriesPer100Reps = request.CaloriesPer100Reps,
+            CaloriesPerHour = request.CaloriesPerHour,
+            Category = request.Category
+        };
+
+        var result = await _mediator.Send(command, cancellationToken).ConfigureAwait(false);
+        return result.ToAuthActionResult(Ok);
+    }
+
+    [HttpPut("{activityTypeId:guid}")]
+    [Authorize(Roles = "admin")]
+    [ProducesResponseType(typeof(ActivityTypeDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Update(Guid activityTypeId, [FromBody] UpdateActivityTypeRequest request, CancellationToken cancellationToken)
+    {
+        if (!Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId))
+        {
+            return Unauthorized();
+        }
+
+        var command = new UpdateActivityTypeCommand
+        {
+            UserId = userId,
+            ActivityTypeId = activityTypeId,
+            Name = request.Name,
+            Description = request.Description,
+            CaloriesPer100Reps = request.CaloriesPer100Reps,
+            CaloriesPerHour = request.CaloriesPerHour,
+            Category = request.Category
+        };
+
+        var result = await _mediator.Send(command, cancellationToken).ConfigureAwait(false);
+        return result.ToAuthActionResult(Ok);
+    }
+}
