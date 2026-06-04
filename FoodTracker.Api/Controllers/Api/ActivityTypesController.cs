@@ -1,7 +1,6 @@
 using FoodTracker.Api.Contracts;
 using FoodTracker.Api.Extensions;
 using FoodTracker.Application.Features.Activities;
-using FoodTracker.Application.Features.Nutrition;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
