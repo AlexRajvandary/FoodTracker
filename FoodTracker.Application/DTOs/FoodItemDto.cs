@@ -1,4 +1,4 @@
-namespace FoodTracker.Application.Features.Nutrition;
+namespace FoodTracker.Application.DTOs;
 
 public class FoodItemDto
 {

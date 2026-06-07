@@ -1,4 +1,4 @@
-using FoodTracker.Application.Features.Activities;
+using FoodTracker.Application.DTOs;
 using FoodTracker.Domain.Activities;
 
 namespace FoodTracker.Application.Features.Nutrition;

@@ -1,5 +1,6 @@
 using FoodTracker.Api.Contracts;
 using FoodTracker.Api.Extensions;
+using FoodTracker.Application.DTOs;
 using FoodTracker.Application.Features.Activities;
 using FoodTracker.Domain.Common.Results;
 using MediatR;

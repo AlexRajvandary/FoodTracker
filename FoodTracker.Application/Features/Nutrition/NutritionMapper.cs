@@ -1,3 +1,4 @@
+using FoodTracker.Application.DTOs;
 using FoodTracker.Domain.Nutrition;
 
 namespace FoodTracker.Application.Features.Nutrition;
@@ -30,19 +31,4 @@ internal static class NutritionMapper
         CarbsPer100g = x.CarbsPer100g,
         Category = x.Category,
     };
-
-    public static FoodEntryDto ToDto(this FoodEntry x) =>
-        new()
-        {
-            Id = x.Id,
-            FoodItemId = x.FoodItemId,
-            FoodName = x.FoodName,
-            ConsumedAt = x.ConsumedAtUtc,
-            GramsConsumed = x.GramsConsumed,
-            PortionNote = x.PortionNote,
-            Calories = x.Calories,
-            Proteins = x.Proteins,
-            Fats = x.Fats,
-            Carbs = x.Carbs,
-        };
 }

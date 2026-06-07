@@ -1,3 +1,4 @@
+using FoodTracker.Application.DTOs;
 using FoodTracker.Domain.Common.Results;
 using MediatR;
 

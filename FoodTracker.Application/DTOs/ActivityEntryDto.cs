@@ -1,4 +1,4 @@
-namespace FoodTracker.Application.Features.Activities;
+namespace FoodTracker.Application.DTOs;
 
 public sealed class ActivityEntryDto
 {

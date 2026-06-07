@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using FoodTracker.Api.Contracts;
 using FoodTracker.Api.Extensions;
+using FoodTracker.Application.DTOs;
 using FoodTracker.Application.Features.Nutrition;
 using FoodTracker.Domain.Common.Results;
 using MediatR;
