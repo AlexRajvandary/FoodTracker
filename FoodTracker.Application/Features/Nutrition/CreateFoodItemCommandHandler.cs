@@ -27,7 +27,6 @@ public sealed class CreateFoodItemCommandHandler : IRequestHandler<CreateFoodIte
             FatsPer100g = command.FatsPer100g ?? 0,
             CarbsPer100g = command.CarbsPer100g ?? 0,
             PortionGrams = command.PortionGrams,
-            PortionHint = command.PortionHint,
             Category = command.Category,
             OwnerUserId = command.UserId,
             CreatedAtUtc = DateTime.UtcNow,

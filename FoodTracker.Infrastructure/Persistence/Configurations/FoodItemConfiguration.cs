@@ -13,7 +13,6 @@ public class FoodItemConfiguration : IEntityTypeConfiguration<FoodItem>
         entity.Property(e => e.Name).HasMaxLength(500).IsRequired();
         entity.Property(e => e.Description).HasMaxLength(2000);
         entity.Property(e => e.Category).HasMaxLength(100);
-        entity.Property(e => e.PortionHint).HasMaxLength(500);
         entity.Property(e => e.CaloriesPer100g).HasPrecision(18, 4);
         entity.Property(e => e.ProteinsPer100g).HasPrecision(18, 4);
         entity.Property(e => e.FatsPer100g).HasPrecision(18, 4);

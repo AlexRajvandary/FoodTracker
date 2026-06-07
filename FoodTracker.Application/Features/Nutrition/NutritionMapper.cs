@@ -16,7 +16,6 @@ internal static class NutritionMapper
             FatsPer100g = x.FatsPer100g,
             CarbsPer100g = x.CarbsPer100g,
             PortionGrams = x.PortionGrams,
-            PortionHint = x.PortionHint,
             Category = x.Category,
         };
 
