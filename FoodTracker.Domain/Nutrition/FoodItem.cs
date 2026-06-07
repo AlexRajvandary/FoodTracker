@@ -6,12 +6,11 @@ public class FoodItem
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
-    public decimal CaloriesPer100g { get; set; }
-    public decimal ProteinsPer100g { get; set; }
-    public decimal FatsPer100g { get; set; }
-    public decimal CarbsPer100g { get; set; }
-    public decimal? PortionGrams { get; set; }
-    public string? PortionHint { get; set; }
+    public double CaloriesPer100g { get; set; }
+    public double ProteinsPer100g { get; set; }
+    public double FatsPer100g { get; set; }
+    public double CarbsPer100g { get; set; }
+    public double? PortionGrams { get; set; }
     public string? Category { get; set; }
     public Guid? OwnerUserId { get; set; }
     public DateTime CreatedAtUtc { get; set; }

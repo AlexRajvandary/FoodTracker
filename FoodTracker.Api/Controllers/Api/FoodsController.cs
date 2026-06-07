@@ -55,7 +55,7 @@ public class FoodsController : ControllerBase
             .Send(listFoodCatalogQuery, cancellationToken)
             .ConfigureAwait(false);
 
-        return Ok(result);
+        return result.ToActionResult(Ok);
     }
 
     [HttpPost]
@@ -83,7 +83,7 @@ public class FoodsController : ControllerBase
         };
 
         var result = await _mediator.Send(command, cancellationToken).ConfigureAwait(false);
-        return result.ToAuthActionResult(Ok);
+        return result.ToActionResult(Ok);
     }
 
     [HttpDelete("{foodItemId:guid}")]
@@ -107,7 +107,7 @@ public class FoodsController : ControllerBase
 
         var result = await _mediator.Send(command, cancellationToken).ConfigureAwait(false);
 
-        return result.ToAuthActionResult(NoContent);
+        return result.ToActionResult(NoContent);
     }
 
     [HttpGet("{foodItemId:guid}")]
@@ -129,7 +129,7 @@ public class FoodsController : ControllerBase
         };
 
         var result = await _mediator.Send(query, cancellationToken).ConfigureAwait(false);
-        return result.ToAuthActionResult(Ok);
+        return result.ToActionResult(Ok);
     }   
 
     [HttpPatch("{foodItemId:guid}")]
@@ -161,7 +161,7 @@ public class FoodsController : ControllerBase
         };
 
         var result = await _mediator.Send(command, cancellationToken).ConfigureAwait(false);
-        return result.ToAuthActionResult(Ok);
+        return result.ToActionResult(Ok);
     }
 
     [HttpPut("{foodItemId:guid}")]
@@ -191,6 +191,6 @@ public class FoodsController : ControllerBase
 
         var result = await _mediator.Send(command, cancellationToken).ConfigureAwait(false);
 
-        return result.ToAuthActionResult(Ok);
+        return result.ToActionResult(Ok);
     }
 }

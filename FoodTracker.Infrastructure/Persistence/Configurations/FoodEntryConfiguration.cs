@@ -21,7 +21,7 @@ public class FoodEntryConfiguration : IEntityTypeConfiguration<FoodEntry>
         entity
             .HasOne<FoodItem>()
             .WithMany()
-            .HasForeignKey(e => e.FoodItemId)
+            .HasForeignKey(e => e.FoodId)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }

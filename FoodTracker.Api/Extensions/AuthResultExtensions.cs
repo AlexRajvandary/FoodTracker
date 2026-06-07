@@ -8,7 +8,7 @@ namespace FoodTracker.Api.Extensions;
 
 public static class AuthResultExtensions
 {
-    public static IActionResult ToAuthActionResult<T>(this Result<T> result, Func<T, IActionResult>? onSuccess = null)
+    public static IActionResult ToActionResult<T>(this Result<T> result, Func<T, IActionResult>? onSuccess = null)
     {
         if (result.IsSuccess)
         {
@@ -18,7 +18,7 @@ public static class AuthResultExtensions
         return MapFailure(result.Error!);
     }
 
-    public static IActionResult ToAuthActionResult(this Result result, Func<IActionResult>? onSuccess = null)
+    public static IActionResult ToActionResult(this Result result, Func<IActionResult>? onSuccess = null)
     {
         if (result.IsSuccess)
         {
