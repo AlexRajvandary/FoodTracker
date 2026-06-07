@@ -26,7 +26,11 @@ public class FoodsController : ControllerBase
     [ProducesResponseType(typeof(PagedList<ShortFoodItemDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<IActionResult> Catalog([FromQuery] string? query, [FromQuery] string? category, [FromQuery] int? page, [FromQuery] int? pageSize, CancellationToken cancellationToken)
+    public async Task<IActionResult> Catalog([FromQuery] string? query,
+                                             [FromQuery] string? category,
+                                             [FromQuery] int? page,
+                                             [FromQuery] int? pageSize,
+                                             CancellationToken cancellationToken)
     {
         if(page is null or < 1)
         {
@@ -38,8 +42,16 @@ public class FoodsController : ControllerBase
             pageSize = 10;
         }
 
+        var listFoodCatalogQuery = new ListFoodCatalogQuery
+        {
+            Query = query,
+            Category = category,
+            Page = page,
+            PageSize = pageSize
+        };
+
         var result = await _mediator
-            .Send(new ListFoodCatalogQuery { Query = query , Category = category, Page = page, PageSize = pageSize }, cancellationToken)
+            .Send(listFoodCatalogQuery, cancellationToken)
             .ConfigureAwait(false);
 
         return Ok(result);
@@ -109,10 +121,12 @@ public class FoodsController : ControllerBase
         {
             return Unauthorized();
         }
+
         var query = new GetFoodItemQuery
         {
             FoodItemId = foodItemId
         };
+
         var result = await _mediator.Send(query, cancellationToken).ConfigureAwait(false);
         return result.ToAuthActionResult(Ok);
     }   
