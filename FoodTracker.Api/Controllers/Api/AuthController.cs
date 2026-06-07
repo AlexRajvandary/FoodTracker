@@ -24,7 +24,7 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Register([FromBody] RegisterCommand command, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(command, cancellationToken).ConfigureAwait(false);
-        return result.ToAuthActionResult(t => new ObjectResult(t) { StatusCode = StatusCodes.Status201Created });
+        return result.ToActionResult(t => new ObjectResult(t) { StatusCode = StatusCodes.Status201Created });
     }
 
     [HttpPost("login")]
@@ -32,7 +32,7 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Login([FromBody] LoginCommand command, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(command, cancellationToken).ConfigureAwait(false);
-        return result.ToAuthActionResult();
+        return result.ToActionResult();
     }
 
     [HttpPost("refresh")]
@@ -40,7 +40,7 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Refresh([FromBody] RefreshCommand command, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(command, cancellationToken).ConfigureAwait(false);
-        return result.ToAuthActionResult();
+        return result.ToActionResult();
     }
 
     [HttpPost("logout")]
@@ -56,7 +56,7 @@ public class AuthController : ControllerBase
 
         var command = new LogoutCommand { AuthenticatedUserId = userId, RefreshToken = body?.RefreshToken };
         var result = await _mediator.Send(command, cancellationToken).ConfigureAwait(false);
-        return result.ToAuthActionResult();
+        return result.ToActionResult();
     }
 
     [HttpGet("me")]
@@ -69,7 +69,7 @@ public class AuthController : ControllerBase
         }
 
         var result = await _mediator.Send(new GetMeQuery { UserId = id }, cancellationToken).ConfigureAwait(false);
-        return result.ToAuthActionResult();
+        return result.ToActionResult();
     }
 
     [HttpPost("telegram")]
@@ -77,7 +77,7 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Telegram([FromBody] TelegramAuthCommand command, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(command, cancellationToken).ConfigureAwait(false);
-        return result.ToAuthActionResult();
+        return result.ToActionResult();
     }
 
     [HttpPost("link/telegram")]
@@ -92,6 +92,6 @@ public class AuthController : ControllerBase
         var result = await _mediator
             .Send(new LinkTelegramCommand { UserId = id, InitData = body.InitData }, cancellationToken)
             .ConfigureAwait(false);
-        return result.ToAuthActionResult();
+        return result.ToActionResult();
     }
 }

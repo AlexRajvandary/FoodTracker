@@ -2,9 +2,9 @@ namespace FoodTracker.Api.Contracts;
 
 public sealed class CreateActivityTypeRequest
 {
-    public string Name { get; init; } = string.Empty;
-    public string? Description { get; init; }
-    public decimal? CaloriesPerHour { get; init; }
-    public decimal? CaloriesPer100Reps { get; init; }
-    public string? Category { get; init; }
+    public required string Name { get; init; }
+    public string Description { get; init; } = string.Empty;
+    public double? CaloriesPerHour { get; init; }
+    public double? CaloriesPer100Reps { get; init; }
+    public string Category { get; init; } = string.Empty;
 }

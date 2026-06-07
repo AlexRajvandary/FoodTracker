@@ -11,7 +11,6 @@ public class FoodEntryConfiguration : IEntityTypeConfiguration<FoodEntry>
         entity.ToTable("food_entries");
         entity.HasKey(e => e.Id);
         entity.Property(e => e.FoodName).HasMaxLength(500).IsRequired();
-        entity.Property(e => e.PortionNote).HasMaxLength(500);
         entity.Property(e => e.GramsConsumed).HasPrecision(18, 4);
         entity.Property(e => e.Calories).HasPrecision(18, 4);
         entity.Property(e => e.Proteins).HasPrecision(18, 4);
@@ -21,7 +20,7 @@ public class FoodEntryConfiguration : IEntityTypeConfiguration<FoodEntry>
         entity
             .HasOne<FoodItem>()
             .WithMany()
-            .HasForeignKey(e => e.FoodItemId)
+            .HasForeignKey(e => e.FoodId)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }

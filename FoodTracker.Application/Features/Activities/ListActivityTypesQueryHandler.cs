@@ -1,6 +1,5 @@
 using FoodTracker.Application.Abstractions.Persistence;
 using FoodTracker.Application.DTOs;
-using FoodTracker.Application.Features.Nutrition;
 using FoodTracker.Domain.Common.Results;
 using MediatR;
 

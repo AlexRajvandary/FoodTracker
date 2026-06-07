@@ -1,7 +1,7 @@
 using FoodTracker.Application.DTOs;
 using FoodTracker.Domain.Activities;
 
-namespace FoodTracker.Application.Features.Nutrition;
+namespace FoodTracker.Application.Features.Activities;
 
 internal static class ActivityMapper
 {

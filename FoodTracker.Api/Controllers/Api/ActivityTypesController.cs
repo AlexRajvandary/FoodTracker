@@ -72,7 +72,7 @@ public class ActivityTypesController : ControllerBase
         };
 
         var result = await _mediator.Send(command, cancellationToken).ConfigureAwait(false);
-        return result.ToAuthActionResult(Ok);
+        return result.ToActionResult(Ok);
     }
 
     [HttpDelete("{activityTypeId:guid}")]
@@ -95,7 +95,7 @@ public class ActivityTypesController : ControllerBase
         };
 
         var result = await _mediator.Send(command, cancellationToken).ConfigureAwait(false);
-        return result.ToAuthActionResult(NoContent);
+        return result.ToActionResult(NoContent);
     }
 
     [HttpGet("{activityTypeId:guid}")]
@@ -107,7 +107,7 @@ public class ActivityTypesController : ControllerBase
     public async Task<IActionResult> Get(Guid activityTypeId, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(new GetActivityTypeQuery { ActivityTypeId = activityTypeId }, cancellationToken).ConfigureAwait(false);
-        return result.ToAuthActionResult(Ok);
+        return result.ToActionResult(Ok);
     }
 
     [HttpPatch("{activityTypeId:guid}")]
@@ -138,7 +138,7 @@ public class ActivityTypesController : ControllerBase
         };
 
         var result = await _mediator.Send(command, cancellationToken).ConfigureAwait(false);
-        return result.ToAuthActionResult(Ok);
+        return result.ToActionResult(Ok);
     }
 
     [HttpPut("{activityTypeId:guid}")]
@@ -166,6 +166,6 @@ public class ActivityTypesController : ControllerBase
         };
 
         var result = await _mediator.Send(command, cancellationToken).ConfigureAwait(false);
-        return result.ToAuthActionResult(Ok);
+        return result.ToActionResult(Ok);
     }
 }

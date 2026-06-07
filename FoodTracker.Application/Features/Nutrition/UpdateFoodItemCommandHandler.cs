@@ -42,7 +42,6 @@ public sealed class UpdateFoodItemCommandHandler : IRequestHandler<UpdateFoodIte
         foodItem.FatsPer100g = command.FatsPer100g;
         foodItem.CarbsPer100g = command.CarbsPer100g;
         foodItem.PortionGrams = command.PortionGrams;
-        foodItem.PortionHint = command.PortionHint;
         foodItem.Category = command.Category;
 
         await _unitOfWork
