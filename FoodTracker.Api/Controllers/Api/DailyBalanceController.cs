@@ -40,7 +40,7 @@ namespace FoodTracker.Api.Controllers.Api
             return Ok(result);
         }
 
-        [HttpGet]
+        [HttpGet("period")]
         [Authorize(Roles = "admin, user")]
         [ProducesResponseType(typeof(PeriodBalanceDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
