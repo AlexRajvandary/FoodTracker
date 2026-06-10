@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.0.31903.59
+# Visual Studio Version 18
+VisualStudioVersion = 18.6.11822.322 stable
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FoodTracker.Domain", "FoodTracker.Domain\FoodTracker.Domain.csproj", "{0D4D4579-F4C3-4F61-8E79-BB64CFC31064}"
 EndProject
@@ -12,6 +12,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FoodTracker.Api", "FoodTracker.Api\FoodTracker.Api.csproj", "{3F312D7F-1B2E-45A0-948A-18C2FB31194B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FoodTracker.Application", "FoodTracker.Application\FoodTracker.Application.csproj", "{49DB65CC-3894-498F-B3AF-C23CD868C717}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FoodDataImport", "FoodDataImport\FoodDataImport.csproj", "{3AED16FE-19FD-438E-AAAC-EF43BCF19A1D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -83,8 +85,23 @@ Global
 		{49DB65CC-3894-498F-B3AF-C23CD868C717}.Release|x64.Build.0 = Release|Any CPU
 		{49DB65CC-3894-498F-B3AF-C23CD868C717}.Release|x86.ActiveCfg = Release|Any CPU
 		{49DB65CC-3894-498F-B3AF-C23CD868C717}.Release|x86.Build.0 = Release|Any CPU
+		{3AED16FE-19FD-438E-AAAC-EF43BCF19A1D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3AED16FE-19FD-438E-AAAC-EF43BCF19A1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3AED16FE-19FD-438E-AAAC-EF43BCF19A1D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{3AED16FE-19FD-438E-AAAC-EF43BCF19A1D}.Debug|x64.Build.0 = Debug|Any CPU
+		{3AED16FE-19FD-438E-AAAC-EF43BCF19A1D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3AED16FE-19FD-438E-AAAC-EF43BCF19A1D}.Debug|x86.Build.0 = Debug|Any CPU
+		{3AED16FE-19FD-438E-AAAC-EF43BCF19A1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3AED16FE-19FD-438E-AAAC-EF43BCF19A1D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3AED16FE-19FD-438E-AAAC-EF43BCF19A1D}.Release|x64.ActiveCfg = Release|Any CPU
+		{3AED16FE-19FD-438E-AAAC-EF43BCF19A1D}.Release|x64.Build.0 = Release|Any CPU
+		{3AED16FE-19FD-438E-AAAC-EF43BCF19A1D}.Release|x86.ActiveCfg = Release|Any CPU
+		{3AED16FE-19FD-438E-AAAC-EF43BCF19A1D}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5E749B1F-5876-4481-B844-F82F2378AC1F}
 	EndGlobalSection
 EndGlobal

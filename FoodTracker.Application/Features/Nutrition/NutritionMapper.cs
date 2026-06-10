@@ -15,19 +15,23 @@ internal static class NutritionMapper
             ProteinsPer100g = x.ProteinsPer100g,
             FatsPer100g = x.FatsPer100g,
             CarbsPer100g = x.CarbsPer100g,
-            PortionGrams = x.PortionGrams,
-            Category = x.Category,
+            ServingSizeGrams = x.ServingSizeGrams,
+            Categories = x.FoodItemCategories
+            .Select(c => c.FoodCategory.Name)
+            .ToList()
         };
 
     public static ShortFoodItemDto ToShortDto(this FoodItem x) =>
-    new()
-    {
-        Id = x.Id,
-        Name = x.Name,
-        CaloriesPer100g = x.CaloriesPer100g,
-        ProteinsPer100g = x.ProteinsPer100g,
-        FatsPer100g = x.FatsPer100g,
-        CarbsPer100g = x.CarbsPer100g,
-        Category = x.Category,
-    };
+        new()
+        {
+            Id = x.Id,
+            Name = x.Name,
+            CaloriesPer100g = x.CaloriesPer100g,
+            ProteinsPer100g = x.ProteinsPer100g,
+            FatsPer100g = x.FatsPer100g,
+            CarbsPer100g = x.CarbsPer100g,
+            Categories = x.FoodItemCategories
+                .Select(c => c.FoodCategory.Name)
+                .ToList()
+        };
 }

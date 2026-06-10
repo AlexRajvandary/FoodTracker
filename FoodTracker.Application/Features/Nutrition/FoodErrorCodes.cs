@@ -11,4 +11,5 @@ public static class FoodErrorCodes
     public const string InvalidCategory = "food.invalid_category";
     public const string MissingPortionSize = "food.missing_portion_size";
     public const string MissingConsumptionAmount = "food.missing_consumption_amount";
+    public const string MissingBarCode = "food.missing_barcode";
 }

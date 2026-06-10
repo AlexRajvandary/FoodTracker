@@ -18,6 +18,6 @@ public sealed class ListActivityTypesQueryHandler : IRequestHandler<ListActivity
     {
         var list = await _types.ListCatalogAsync(request.Query, request.Category, request.Page ?? 1, request.PageSize ?? 10, cancellationToken).ConfigureAwait(false);
         var dtos = list.Select(x => x.ToShortDto()).ToList();
-        return Result<PagedList<ActivityTypeShortDto>>.Success(new PagedList<ActivityTypeShortDto>(dtos, request.Page ?? 1, request.PageSize ?? 10));
+        return Result<PagedList<ActivityTypeShortDto>>.Success(new PagedList<ActivityTypeShortDto>(dtos, request.Page ?? 1, request.PageSize ?? 10, dtos.Count));
     }
 }

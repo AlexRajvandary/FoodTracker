@@ -27,28 +27,27 @@ public class FoodsController : ControllerBase
     [ProducesResponseType(typeof(PagedList<ShortFoodItemDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<IActionResult> Catalog([FromQuery] string? query,
-                                             [FromQuery] string? category,
-                                             [FromQuery] int? page,
-                                             [FromQuery] int? pageSize,
-                                             CancellationToken cancellationToken)
+    public async Task<IActionResult> Catalog([FromBody] FoodCatalogRequest request, CancellationToken cancellationToken)
     {
-        if(page is null or < 1)
+        if (request.Page < 1)
         {
-            page = 1;
+            request.Page = 1;
         }
 
-        if (pageSize is null or < 1)
+        if (request.PageSize < 1)
         {
-            pageSize = 10;
+            request.PageSize = 10;
         }
 
         var listFoodCatalogQuery = new ListFoodCatalogQuery
         {
-            Query = query,
-            Category = category,
-            Page = page,
-            PageSize = pageSize
+            Brand = request.Brand,
+            CategoryIds = request.CategoryIds,
+            Page = request.Page,
+            PageSize = request.PageSize,
+            Query = request.Query,
+            SortDescending = request.SortDescending,
+            SortBy = request.SortBy
         };
 
         var result = await _mediator
@@ -72,14 +71,23 @@ public class FoodsController : ControllerBase
 
         var command = new CreateFoodItemCommand
         {
-            UserId = userId,
-            Name = request.Name,
-            Category = request.Category,
-            Description = request.Description,
+            Barcode = request.Barcode,
+            Brand = request.Brand,
             CaloriesPer100g = request.CaloriesPer100g,
-            ProteinsPer100g = request.ProteinsPer100g,
-            FatsPer100g = request.FatsPer100g,
+            CategoryIds = request.CategoryIds,
             CarbsPer100g = request.CarbsPer100g,
+            Description = request.Description,
+            FatsPer100g = request.FatsPer100g,
+            FiberPer100g = request.FiberPer100g,
+            ImageUrl = request.ImageUrl,
+            Name = request.Name,
+            NewCategoryNames = request.NewCategoryNames,
+            ProteinsPer100g = request.ProteinsPer100g,
+            SaltPer100g = request.SaltPer100g,
+            SaturatedFatPer100g = request.SaturatedFatPer100g,
+            ServingSizeGrams = request.ServingSizeGrams,
+            SugarsPer100g = request.SugarsPer100g,
+            UserId = userId
         };
 
         var result = await _mediator.Send(command, cancellationToken).ConfigureAwait(false);
@@ -106,7 +114,6 @@ public class FoodsController : ControllerBase
         };
 
         var result = await _mediator.Send(command, cancellationToken).ConfigureAwait(false);
-
         return result.ToActionResult(NoContent);
     }
 
@@ -150,14 +157,24 @@ public class FoodsController : ControllerBase
 
         var command = new PatchFoodItemCommand
         {
-            UserId = userId,
-            FoodItemId = foodItemId,
-            Name = request.Name,
-            Description = request.Description,
+            Barcode = request.Barcode,
+            Brand = request.Brand,
             CaloriesPer100g = request.CaloriesPer100g,
-            ProteinsPer100g = request.ProteinsPer100g,
-            FatsPer100g = request.FatsPer100g,
+            CategoryIds = request.CategoryIds,
             CarbsPer100g = request.CarbsPer100g,
+            Description = request.Description,
+            FatsPer100g = request.FatsPer100g,
+            FoodItemId = foodItemId,
+            FiberPer100g = request.FiberPer100g,
+            ImageUrl = request.ImageUrl,
+            Name = request.Name,
+            NewCategoryNames = request.NewCategoryNames,
+            ProteinsPer100g = request.ProteinsPer100g,
+            SaltPer100g = request.SaltPer100g,
+            SaturatedFatPer100g = request.SaturatedFatPer100g,
+            ServingSizeGrams = request.ServingSizeGrams,
+            SugarsPer100g = request.SugarsPer100g,
+            UserId = userId,
         };
 
         var result = await _mediator.Send(command, cancellationToken).ConfigureAwait(false);
@@ -179,18 +196,27 @@ public class FoodsController : ControllerBase
 
         var command = new UpdateFoodItemCommand
         {
-            UserId = userId,
-            FoodItemId = foodItemId,
-            Name = request.Name,
-            Description = request.Description,
+            Barcode = request.Barcode,
+            Brand = request.Brand,
             CaloriesPer100g = request.CaloriesPer100g,
-            ProteinsPer100g = request.ProteinsPer100g,
-            FatsPer100g = request.FatsPer100g,
+            CategoryIds = request.CategoryIds,
             CarbsPer100g = request.CarbsPer100g,
+            Description = request.Description,
+            FatsPer100g = request.FatsPer100g,
+            FiberPer100g = request.FiberPer100g,
+            FoodItemId = foodItemId,
+            ImageUrl = request.ImageUrl,
+            Name = request.Name,
+            NewCategoryNames = request.NewCategoryNames,
+            ProteinsPer100g = request.ProteinsPer100g,
+            SaltPer100g = request.SaltPer100g,
+            SaturatedFatPer100g = request.SaturatedFatPer100g,
+            ServingSizeGrams = request.ServingSizeGrams,
+            SugarsPer100g = request.SugarsPer100g,
+            UserId = userId
         };
 
         var result = await _mediator.Send(command, cancellationToken).ConfigureAwait(false);
-
         return result.ToActionResult(Ok);
     }
 }

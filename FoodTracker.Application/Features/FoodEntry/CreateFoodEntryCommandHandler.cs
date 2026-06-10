@@ -36,13 +36,13 @@ namespace FoodTracker.Application.Features.FoodEntry
             {
                 return Result<FoodEntryDto>.Failure(new Error(FoodErrorCodes.MissingConsumptionAmount, $"Either {nameof(command.GramsConsumed)} or {nameof(command.PortionsConsumed)} must be specified."));
             }
-            else if (foodItem.PortionGrams is null)
+            else if (foodItem.ServingSizeGrams is null)
             {
                 return Result<FoodEntryDto>.Failure(new Error(FoodErrorCodes.MissingPortionSize, $"Food item '{foodItem.Name}' does not have a portion size configured."));
             }
             else
             {
-                gramsConsumed = command.PortionsConsumed.Value * foodItem.PortionGrams.Value;
+                gramsConsumed = command.PortionsConsumed.Value * foodItem.ServingSizeGrams.Value;
             }
 
             var foodEntry = new Domain.Nutrition.FoodEntry

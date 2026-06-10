@@ -7,34 +7,36 @@ namespace FoodTracker.Application.Features.Nutrition;
 
 public sealed class ListFoodCatalogQueryHandler : IRequestHandler<ListFoodCatalogQuery, Result<PagedList<ShortFoodItemDto>>>
 {
-    private static readonly HashSet<string> AllowedCategories =
-    [
-        "напитки",
-        "гарниры",
-        "мясо",
-        "сладкое",
-        "выпечка",
-        "фрукты",
-        "овощи",
-    ];
+    private readonly IFoodItemRepository _foodItemsRepository;
 
-    private readonly IFoodItemRepository _foodItems;
-
-    public ListFoodCatalogQueryHandler(IFoodItemRepository items)
+    public ListFoodCatalogQueryHandler(IFoodItemRepository foodItems)
     {
-        _foodItems = items;
+        _foodItemsRepository = foodItems;
     }
 
     public async Task<Result<PagedList<ShortFoodItemDto>>> Handle(ListFoodCatalogQuery request, CancellationToken cancellationToken)
     {
-        if (!string.IsNullOrWhiteSpace(request.Category) && !AllowedCategories.Contains(request.Category))
-        {
-            return Result<PagedList<ShortFoodItemDto>>.Failure(
-                new Error(FoodErrorCodes.InvalidCategory, "Неизвестная категория."));
-        }
+        var foodItemsPagedQueryResult = await _foodItemsRepository
+            .ListCatalogAsync(
+                request.CategoryIds,
+                request.Query,
+                request.SortBy,
+                request.SortDescending,
+                request.Page,
+                request.PageSize,
+                cancellationToken)
+            .ConfigureAwait(false);
 
-        var list = await _foodItems.ListCatalogAsync(request.Query, request.Category, request.Page ?? 1, request.PageSize ?? 10, cancellationToken).ConfigureAwait(false);
-        var dto = list.Select(x => x.ToShortDto()).ToList();
-        return Result<PagedList<ShortFoodItemDto>>.Success(new PagedList<ShortFoodItemDto>(dto, request.Page ?? 1, request.PageSize ?? 10));
+        var foodItemsDtos = foodItemsPagedQueryResult.Items.Select(fi => fi.ToShortDto()).ToList();
+
+        var pagedList = new PagedList<ShortFoodItemDto>
+        (
+            foodItemsDtos,
+            request.Page,
+            request.PageSize,
+            foodItemsPagedQueryResult.TotalCount
+        );
+
+        return Result<PagedList<ShortFoodItemDto>>.Success(pagedList);
     }
 }

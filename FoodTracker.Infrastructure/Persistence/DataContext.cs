@@ -11,15 +11,12 @@ namespace FoodTracker.Infrastructure.Persistence;
 public sealed class DataContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>
 {
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
-
     public DbSet<UserAuthProvider> UserAuthProviders => Set<UserAuthProvider>();
-
     public DbSet<FoodItem> FoodItems => Set<FoodItem>();
-
+    public DbSet<FoodCategory> FoodCategories => Set<FoodCategory>();
+    public DbSet<FoodItemCategory> FoodItemCategories => Set<FoodItemCategory>();
     public DbSet<FoodEntry> FoodEntries => Set<FoodEntry>();
-
     public DbSet<ActivityType> ActivityTypes => Set<ActivityType>();
-
     public DbSet<ActivityEntry> ActivityEntries => Set<ActivityEntry>();
 
     public DataContext(DbContextOptions<DataContext> options)
