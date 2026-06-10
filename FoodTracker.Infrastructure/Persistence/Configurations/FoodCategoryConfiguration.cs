@@ -13,11 +13,11 @@ public sealed class FoodCategoryConfiguration : IEntityTypeConfiguration<FoodCat
         entity.HasKey(x => x.Id);
 
         entity.Property(x => x.Name)
-            .HasMaxLength(200)
+            .HasMaxLength(400)
             .IsRequired();
 
         entity.Property(x => x.ExternalId)
-            .HasMaxLength(200);
+            .HasMaxLength(400);
 
         entity.HasMany(x => x.FoodItemCategories)
             .WithOne(x => x.FoodCategory)

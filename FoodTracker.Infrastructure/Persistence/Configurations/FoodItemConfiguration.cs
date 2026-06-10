@@ -20,7 +20,7 @@ public class FoodItemConfiguration : IEntityTypeConfiguration<FoodItem>
             .HasMaxLength(64);
 
         entity.Property(e => e.Brand)
-            .HasMaxLength(256);
+            .HasMaxLength(500);
 
         entity.Property(e => e.Description)
             .HasMaxLength(2000);
@@ -66,7 +66,7 @@ public class FoodItemConfiguration : IEntityTypeConfiguration<FoodItem>
         entity.HasIndex(e => e.Brand);
 
         entity.Property(x => x.ExternalId)
-            .HasMaxLength(200);
+            .HasMaxLength(500);
 
         entity.HasIndex(x => x.ExternalId);
     }
