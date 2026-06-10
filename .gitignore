@@ -363,3 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 /FoodDataImport/FoodDataImport.csproj
 /FoodDataImport/Program.cs
+/FoodDataImport/appsettings.json
