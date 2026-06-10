@@ -79,8 +79,9 @@ namespace FoodTracker.Api.Controllers.Api
             var command = new PatchFoodEntryCommand
             {
                 ConsumedAtUtc = request.ConsumedAtUtc,
-                GramsConsumed = request.GramsConsumed,
                 FoodItemId = request.FoodItemId,
+                GramsConsumed = request.GramsConsumed,
+                PortionConsumed = request.PortionConsumed,
                 UserId = userId
             };
 

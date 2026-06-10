@@ -45,13 +45,25 @@ namespace FoodTracker.Application.Features.FoodEntry
                 gramsConsumed = command.PortionsConsumed.Value * foodItem.ServingSizeGrams.Value;
             }
 
+            var multiplier = gramsConsumed / 100d;
+
             var foodEntry = new Domain.Nutrition.FoodEntry
             {
                 Id = Guid.NewGuid(),
                 UserId = command.UserId,
                 FoodId = command.FoodId,
+                FoodName = foodItem.Name,
                 ConsumedAtUtc = command.ConsumedAtUtc,
-                GramsConsumed = gramsConsumed
+                CreatedAtUtc = DateTime.UtcNow,
+                GramsConsumed = gramsConsumed,
+                Calories = foodItem.CaloriesPer100g * multiplier,
+                Proteins = foodItem.ProteinsPer100g * multiplier,
+                Fats = foodItem.FatsPer100g * multiplier,
+                Carbs = foodItem.CarbsPer100g * multiplier,
+                Fiber = foodItem.FiberPer100g * multiplier,
+                Salt = foodItem.SaltPer100g * multiplier,
+                SaturatedFat = foodItem.SaturatedFatPer100g * multiplier,
+                Sugars = foodItem.SugarsPer100g * multiplier,
             };
 
             var result = await _foodEntryRepository.AddAsync(foodEntry, cancellationToken);

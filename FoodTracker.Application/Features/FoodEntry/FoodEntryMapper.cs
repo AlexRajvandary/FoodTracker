@@ -11,11 +11,15 @@ namespace FoodTracker.Application.Features.FoodEntry
             Carbs = foodEntry.Carbs,
             ConsumedAtUtc = foodEntry.ConsumedAtUtc,
             Fats = foodEntry.Fats,
+            Fiber = foodEntry.Fiber,
             FoodId = foodEntry.FoodId,
-            Grams = foodEntry.GramsConsumed,
+            GramsConsumed = foodEntry.GramsConsumed,
             Id = foodEntry.Id,
             Name = foodEntry.FoodName,
-            Proteins = foodEntry.Proteins
+            Proteins = foodEntry.Proteins,
+            Salt = foodEntry.Salt,
+            SaturatedFat = foodEntry.SaturatedFat,
+            Sugars = foodEntry.Sugars
         };
     }
 }

@@ -77,6 +77,7 @@ public class FoodsController : ControllerBase
             CategoryIds = request.CategoryIds,
             CarbsPer100g = request.CarbsPer100g,
             Description = request.Description,
+            ExternalId = request.ExternalId,
             FatsPer100g = request.FatsPer100g,
             FiberPer100g = request.FiberPer100g,
             ImageUrl = request.ImageUrl,

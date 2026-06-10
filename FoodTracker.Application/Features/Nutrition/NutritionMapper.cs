@@ -8,17 +8,24 @@ internal static class NutritionMapper
     public static FoodItemDto ToDto(this FoodItem x) =>
         new()
         {
-            Id = x.Id,
-            Name = x.Name,
-            Description = x.Description,
+            Barcode = x.Barcode,
+            Brand = x.Brand,
             CaloriesPer100g = x.CaloriesPer100g,
-            ProteinsPer100g = x.ProteinsPer100g,
-            FatsPer100g = x.FatsPer100g,
             CarbsPer100g = x.CarbsPer100g,
-            ServingSizeGrams = x.ServingSizeGrams,
             Categories = x.FoodItemCategories
-            .Select(c => c.FoodCategory.Name)
-            .ToList()
+                .Select(c => c.FoodCategory.Name)
+                .ToList(),
+            Description = x.Description,
+            FatsPer100g = x.FatsPer100g,
+            FiberPer100g = x.FiberPer100g,
+            Id = x.Id,
+            ImageUrl = x.ImageUrl,
+            Name = x.Name,
+            ProteinsPer100g = x.ProteinsPer100g,
+            SaltPer100g = x.SaltPer100g,
+            SaturatedFatPer100g = x.SaturatedFatPer100g,
+            ServingSizeGrams = x.ServingSizeGrams,
+            SugarsPer100g = x.SugarsPer100g,
         };
 
     public static ShortFoodItemDto ToShortDto(this FoodItem x) =>

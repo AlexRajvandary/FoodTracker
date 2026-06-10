@@ -8,6 +8,7 @@ public sealed class CreateFoodItemRequest
     public IReadOnlyList<Guid> CategoryIds { get; set; } = [];
     public double? CarbsPer100g { get; set; }
     public string? Description { get; set; }
+    public string? ExternalId { get; set; }
     public double? FatsPer100g { get; set; }
     public double? FiberPer100g { get; set; }
     public string? ImageUrl { get; set; }

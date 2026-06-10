@@ -13,6 +13,7 @@ public sealed class CreateFoodItemCommand : IRequest<Result<FoodItemDto>>
     public IReadOnlyList<string> NewCategoryNames { get; init; } = [];
     public double? CarbsPer100g { get; init; }
     public string? Description { get; init; }
+    public string? ExternalId { get; init; }
     public double? FatsPer100g { get; init; }
     public double? FiberPer100g { get; set; }
     public string? ImageUrl { get; set; }

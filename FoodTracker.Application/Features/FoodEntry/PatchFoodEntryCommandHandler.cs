@@ -42,11 +42,16 @@ namespace FoodTracker.Application.Features.FoodEntry
 
             if (request.GramsConsumed.HasValue)
             {
+                var multiplier = request.GramsConsumed.Value / 100d;
                 foodEntry.GramsConsumed = request.GramsConsumed.Value;
-                foodEntry.Calories = foodItem.CaloriesPer100g * (request.GramsConsumed.Value / 100);
-                foodEntry.Proteins = foodItem.ProteinsPer100g * (request.GramsConsumed.Value / 100);
-                foodEntry.Fats = foodItem.FatsPer100g * (request.GramsConsumed.Value / 100);
-                foodEntry.Carbs = foodItem.CarbsPer100g * (request.GramsConsumed.Value / 100);
+                foodEntry.Calories = foodItem.CaloriesPer100g * multiplier;
+                foodEntry.Proteins = foodItem.ProteinsPer100g * multiplier;
+                foodEntry.Fats = foodItem.FatsPer100g * multiplier;
+                foodEntry.Carbs = foodItem.CarbsPer100g * multiplier;
+                foodEntry.Fiber = foodItem.FiberPer100g * multiplier;
+                foodEntry.Salt = foodItem.SaltPer100g * multiplier;
+                foodEntry.SaturatedFat = foodItem.SaturatedFatPer100g * multiplier;
+                foodEntry.Sugars = foodItem.SugarsPer100g * multiplier;
             }
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);

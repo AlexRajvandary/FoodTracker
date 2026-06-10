@@ -9,6 +9,7 @@ public class FoodItem
     public double CarbsPer100g { get; set; }
     public DateTime CreatedAtUtc { get; set; }
     public string? Description { get; set; }
+    public string? ExternalId { get; set; }
     public double FatsPer100g { get; set; }
     public double? FiberPer100g { get; set; }
     public Guid Id { get; set; }
