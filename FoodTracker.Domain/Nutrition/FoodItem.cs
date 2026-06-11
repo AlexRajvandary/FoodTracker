@@ -6,6 +6,7 @@ public class FoodItem
     public string? Brand { get; set; }
     public double CaloriesPer100g { get; set; }
     public ICollection<FoodItemCategory> FoodItemCategories { get; set; } = [];
+    public ICollection<FoodItemCountry> FoodItemCountries { get; set; } = [];
     public double CarbsPer100g { get; set; }
     public DateTime CreatedAtUtc { get; set; }
     public string? Description { get; set; }

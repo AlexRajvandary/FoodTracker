@@ -23,8 +23,7 @@ public sealed class FoodCategoryConfiguration : IEntityTypeConfiguration<FoodCat
             .WithOne(x => x.FoodCategory)
             .HasForeignKey(x => x.FoodCategoryId);
 
-        entity.HasIndex(x => x.Name)
-            .IsUnique();
+        entity.HasIndex(x => x.Name);
 
         entity.HasIndex(x => x.ExternalId)
             .IsUnique()

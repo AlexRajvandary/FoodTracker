@@ -23,7 +23,7 @@ public class FoodItemConfiguration : IEntityTypeConfiguration<FoodItem>
             .HasMaxLength(500);
 
         entity.Property(e => e.Description)
-            .HasMaxLength(2000);
+            .HasColumnType("text");
 
         entity.Property(e => e.ImageUrl)
             .HasMaxLength(2048);

@@ -3,6 +3,7 @@ using System;
 using FoodTracker.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FoodTracker.Infrastructure.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20260611211905_UpdateConstraints")]
+    partial class UpdateConstraints
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -131,25 +134,6 @@ namespace FoodTracker.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("user_auth_providers", (string)null);
-                });
-
-            modelBuilder.Entity("FoodTracker.Domain.Nutrition.Country", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
-
-                    b.ToTable("countries", (string)null);
                 });
 
             modelBuilder.Entity("FoodTracker.Domain.Nutrition.FoodCategory", b =>
@@ -348,21 +332,6 @@ namespace FoodTracker.Infrastructure.Migrations
                     b.HasIndex("FoodCategoryId");
 
                     b.ToTable("food_item_categories", (string)null);
-                });
-
-            modelBuilder.Entity("FoodTracker.Domain.Nutrition.FoodItemCountry", b =>
-                {
-                    b.Property<Guid>("FoodItemId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("CountryId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("FoodItemId", "CountryId");
-
-                    b.HasIndex("CountryId");
-
-                    b.ToTable("food_item_countries", (string)null);
                 });
 
             modelBuilder.Entity("FoodTracker.Infrastructure.Identity.ApplicationUser", b =>
@@ -650,25 +619,6 @@ namespace FoodTracker.Infrastructure.Migrations
                     b.Navigation("FoodItem");
                 });
 
-            modelBuilder.Entity("FoodTracker.Domain.Nutrition.FoodItemCountry", b =>
-                {
-                    b.HasOne("FoodTracker.Domain.Nutrition.Country", "Country")
-                        .WithMany("FoodItemCountries")
-                        .HasForeignKey("CountryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("FoodTracker.Domain.Nutrition.FoodItem", "FoodItem")
-                        .WithMany("FoodItemCountries")
-                        .HasForeignKey("FoodItemId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Country");
-
-                    b.Navigation("FoodItem");
-                });
-
             modelBuilder.Entity("FoodTracker.Infrastructure.Identity.RefreshToken", b =>
                 {
                     b.HasOne("FoodTracker.Infrastructure.Identity.ApplicationUser", null)
@@ -729,11 +679,6 @@ namespace FoodTracker.Infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("FoodTracker.Domain.Nutrition.Country", b =>
-                {
-                    b.Navigation("FoodItemCountries");
-                });
-
             modelBuilder.Entity("FoodTracker.Domain.Nutrition.FoodCategory", b =>
                 {
                     b.Navigation("FoodItemCategories");
@@ -742,8 +687,6 @@ namespace FoodTracker.Infrastructure.Migrations
             modelBuilder.Entity("FoodTracker.Domain.Nutrition.FoodItem", b =>
                 {
                     b.Navigation("FoodItemCategories");
-
-                    b.Navigation("FoodItemCountries");
                 });
 #pragma warning restore 612, 618
         }
