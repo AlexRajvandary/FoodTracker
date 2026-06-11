@@ -70,9 +70,6 @@ public class FoodItemConfiguration : IEntityTypeConfiguration<FoodItem>
 
         entity.HasIndex(e => e.Brand);
 
-        entity.Property(x => x.ExternalId)
-            .HasMaxLength(500);
-
         entity.HasIndex(x => x.ExternalId);
     }
 }
