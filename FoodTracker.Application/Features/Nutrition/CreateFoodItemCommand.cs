@@ -10,6 +10,7 @@ public sealed class CreateFoodItemCommand : IRequest<Result<FoodItemDto>>
     public string? Brand { get; set; }
     public double CaloriesPer100g { get; init; }
     public IReadOnlyList<Guid> CategoryIds { get; init; } = [];
+    public IReadOnlyList<Guid> CountryIds { get; init; } = [];
     public IReadOnlyList<string> NewCategoryNames { get; init; } = [];
     public double? CarbsPer100g { get; init; }
     public string? Description { get; init; }

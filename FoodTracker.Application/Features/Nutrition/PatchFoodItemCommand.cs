@@ -10,6 +10,7 @@ public sealed class PatchFoodItemCommand : IRequest<Result<FoodItemDto>>
     public string? Brand { get; init; }
     public double? CaloriesPer100g { get; init; }
     public IReadOnlyList<Guid>? CategoryIds { get; init; }
+    public IReadOnlyList<Guid>? CountryIds { get; init; }
     public double? CarbsPer100g { get; init; }
     public string? Description { get; init; }
     public double? FatsPer100g { get; init; }

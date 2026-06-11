@@ -62,6 +62,17 @@ public sealed class UpdateFoodItemCommandHandler : IRequestHandler<UpdateFoodIte
             });
         }
 
+        foodItem.FoodItemCountries.Clear();
+
+        foreach (var countryId in command.CountryIds.Distinct())
+        {
+            foodItem.FoodItemCountries.Add(new FoodItemCountry
+            {
+                FoodItemId = foodItem.Id,
+                CountryId = countryId
+            });
+        }
+
         foreach (var categoryName in command.NewCategoryNames
             .Where(x => !string.IsNullOrWhiteSpace(x))
             .Select(x => x.Trim())

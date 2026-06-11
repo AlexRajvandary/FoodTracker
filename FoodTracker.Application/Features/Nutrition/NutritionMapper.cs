@@ -15,6 +15,9 @@ internal static class NutritionMapper
             Categories = x.FoodItemCategories
                 .Select(c => c.FoodCategory.Name)
                 .ToList(),
+            Countries = x.FoodItemCountries
+                .Select(c => c.Country.Name)
+                .ToList(),
             Description = x.Description,
             FatsPer100g = x.FatsPer100g,
             FiberPer100g = x.FiberPer100g,
@@ -39,6 +42,9 @@ internal static class NutritionMapper
             CarbsPer100g = x.CarbsPer100g,
             Categories = x.FoodItemCategories
                 .Select(c => c.FoodCategory.Name)
+                .ToList(),
+            Countries = x.FoodItemCountries
+                .Select(c => c.Country.Name)
                 .ToList()
         };
 }

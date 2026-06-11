@@ -59,6 +59,10 @@ public class FoodItemConfiguration : IEntityTypeConfiguration<FoodItem>
             .WithOne(e => e.FoodItem)
             .HasForeignKey(e => e.FoodItemId);
 
+        entity.HasMany(e => e.FoodItemCountries)
+            .WithOne(e => e.FoodItem)
+            .HasForeignKey(e => e.FoodItemId);
+
         entity.HasIndex(e => e.Name);
 
         entity.HasIndex(x => x.Barcode)

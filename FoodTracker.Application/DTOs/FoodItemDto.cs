@@ -6,6 +6,7 @@ public sealed class FoodItemDto
     public string? Brand { get; init; }
     public double CaloriesPer100g { get; init; }
     public IReadOnlyList<string> Categories { get; init; } = [];
+    public IReadOnlyList<string> Countries { get; init; } = [];
     public double? CarbsPer100g { get; init; }
     public string? Description { get; init; }
     public double? FatsPer100g { get; init; }

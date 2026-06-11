@@ -119,6 +119,21 @@ public sealed class PatchFoodItemCommandHandler : IRequestHandler<PatchFoodItemC
             }
         }
 
+        if (command.CountryIds is not null)
+        {
+            foodItem.FoodItemCountries.Clear();
+
+            foreach (var countryId in command.CountryIds.Distinct())
+            {
+                foodItem.FoodItemCountries.Add(new FoodItemCountry
+                {
+                    FoodItemId = foodItem.Id,
+                    CountryId = countryId,
+                });
+            }
+        }
+               
+
         if (command.NewCategoryNames is not null)
         {
             var newCategoryNames = command.NewCategoryNames

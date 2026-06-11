@@ -31,12 +31,15 @@ public class FoodItemRepository : IFoodItemRepository
     public async Task<FoodItem?> GetByBarcodeAsync(string barcode, CancellationToken cancellationToken)
     {
         return await _dataContext.FoodItems
-            .Include(x => x.FoodItemCategories)
+        .AsNoTracking()
+        .Include(x => x.FoodItemCategories)
             .ThenInclude(x => x.FoodCategory)
-            .FirstOrDefaultAsync(
-                x => x.Barcode == barcode,
-                cancellationToken)
-            .ConfigureAwait(false);
+        .Include(x => x.FoodItemCountries)
+            .ThenInclude(x => x.Country)
+        .FirstOrDefaultAsync(
+            x => x.Barcode == barcode,
+            cancellationToken)
+        .ConfigureAwait(false);
     }
 
     public async Task<FoodCategory?> GetCategoryByNameAsync(string name, CancellationToken cancellationToken)
@@ -75,25 +78,27 @@ public class FoodItemRepository : IFoodItemRepository
             .ConfigureAwait(false);
     }
 
-    public async Task<PagedQueryResult<FoodItem>> ListCatalogAsync(
-        IReadOnlyList<Guid> categoryIds,
-        string? query,
-        string? sortBy,
-        bool sortDescending,
-        int page,
-        int pageSize,
-        CancellationToken cancellationToken)
+    public async Task<PagedQueryResult<FoodItem>> ListCatalogAsync(IReadOnlyList<Guid> categoryIds, 
+                                                                   string? query,
+                                                                   string? sortBy,
+                                                                   bool sortDescending,
+                                                                   int page,
+                                                                   int pageSize,
+                                                                   CancellationToken cancellationToken)
     {
+        page = Math.Max(page, 1);
+        pageSize = Math.Clamp(pageSize, 1, 100);
+
         var foodItems = _dataContext
             .FoodItems
             .AsNoTracking()
-            .Include(x => x.FoodItemCategories)
-            .ThenInclude(x => x.FoodCategory)
             .AsQueryable();
 
         if (categoryIds.Count > 0)
         {
-            var distinctCategoryIds = categoryIds.Distinct().ToList();
+            var distinctCategoryIds = categoryIds
+                .Distinct()
+                .ToList();
 
             foodItems = foodItems.Where(x =>
                 x.FoodItemCategories.Any(c =>
@@ -107,7 +112,7 @@ public class FoodItemRepository : IFoodItemRepository
             foodItems = foodItems.Where(foodItem =>
                 EF.Functions.ILike(foodItem.Name, pattern) ||
                 (foodItem.Brand != null && EF.Functions.ILike(foodItem.Brand, pattern)) ||
-                (foodItem.Barcode != null && EF.Functions.ILike(foodItem.Barcode, pattern)));
+                EF.Functions.ILike(foodItem.Barcode, pattern));
         }
 
         foodItems = (sortBy ?? "name").ToLowerInvariant() switch
@@ -153,12 +158,20 @@ public class FoodItemRepository : IFoodItemRepository
                 : foodItems.OrderBy(x => x.Name)
         };
 
-        var totalCount = await foodItems.CountAsync(cancellationToken);
+        var totalCount = await foodItems
+            .CountAsync(cancellationToken)
+            .ConfigureAwait(false);
 
         var items = await foodItems
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
-            .ToListAsync(cancellationToken);
+            .Include(x => x.FoodItemCategories)
+                .ThenInclude(x => x.FoodCategory)
+            .Include(x => x.FoodItemCountries)
+                .ThenInclude(x => x.Country)
+            .AsSplitQuery()
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
 
         return new PagedQueryResult<FoodItem>
         {
