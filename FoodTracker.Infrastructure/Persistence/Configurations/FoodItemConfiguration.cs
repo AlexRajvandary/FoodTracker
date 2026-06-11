@@ -61,7 +61,8 @@ public class FoodItemConfiguration : IEntityTypeConfiguration<FoodItem>
 
         entity.HasIndex(e => e.Name);
 
-        entity.HasIndex(e => e.Barcode);
+        entity.HasIndex(x => x.Barcode)
+            .IsUnique();
 
         entity.HasIndex(e => e.Brand);
 

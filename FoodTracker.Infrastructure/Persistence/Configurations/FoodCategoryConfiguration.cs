@@ -26,6 +26,8 @@ public sealed class FoodCategoryConfiguration : IEntityTypeConfiguration<FoodCat
         entity.HasIndex(x => x.Name)
             .IsUnique();
 
-        entity.HasIndex(x => x.ExternalId);
+        entity.HasIndex(x => x.ExternalId)
+            .IsUnique()
+            .HasFilter("\"ExternalId\" IS NOT NULL");
     }
 }
