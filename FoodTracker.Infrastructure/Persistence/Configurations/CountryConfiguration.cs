@@ -16,6 +16,10 @@ public sealed class CountryConfiguration : IEntityTypeConfiguration<Country>
             .HasMaxLength(200)
             .IsRequired();
 
+        entity.Property(x => x.IsoCode)
+            .HasMaxLength(2)
+            .IsRequired();
+
         entity.HasIndex(x => x.Name)
             .IsUnique();
     }
