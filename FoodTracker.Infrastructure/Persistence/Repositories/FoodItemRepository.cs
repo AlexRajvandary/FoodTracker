@@ -23,6 +23,16 @@ public class FoodItemRepository : IFoodItemRepository
         return item;
     }
 
+    public async Task CreateCategoryAsync(FoodCategory category, CancellationToken cancellationToken)
+    {
+        await _dataContext.FoodCategories
+            .AddAsync(category, cancellationToken)
+            .ConfigureAwait(false);
+
+        await _dataContext.SaveChangesAsync(cancellationToken)
+            .ConfigureAwait(false);
+    }
+
     public async Task DeleteAsync(FoodItem item, CancellationToken cancellationToken)
     {
         _dataContext.FoodItems.Remove(item);
@@ -49,16 +59,6 @@ public class FoodItemRepository : IFoodItemRepository
             .FirstOrDefaultAsync(
                 x => x.Name.ToLower() == name.ToLower(),
                 cancellationToken)
-            .ConfigureAwait(false);
-    }
-
-    public async Task CreateCategoryAsync(FoodCategory category, CancellationToken cancellationToken)
-    {
-        await _dataContext.FoodCategories
-            .AddAsync(category, cancellationToken)
-            .ConfigureAwait(false);
-
-        await _dataContext.SaveChangesAsync(cancellationToken)
             .ConfigureAwait(false);
     }
 
@@ -181,8 +181,6 @@ public class FoodItemRepository : IFoodItemRepository
         };
     }
 
-    private static string EscapeLike(string value) => value.Replace("\\", "\\\\", StringComparison.Ordinal).Replace("%", "\\%", StringComparison.Ordinal).Replace("_", "\\_", StringComparison.Ordinal);
-
     public async Task<IReadOnlyList<FoodCategoryWithItemsCountDto>> ListCategoriesWithItemsCountAsync(CancellationToken cancellationToken)
     {
         return await _dataContext.FoodCategories
@@ -199,4 +197,6 @@ public class FoodItemRepository : IFoodItemRepository
            .OrderBy(x => x.Name)
            .ToListAsync(cancellationToken);
     }
+
+    private static string EscapeLike(string value) => value.Replace("\\", "\\\\", StringComparison.Ordinal).Replace("%", "\\%", StringComparison.Ordinal).Replace("_", "\\_", StringComparison.Ordinal);
 }
