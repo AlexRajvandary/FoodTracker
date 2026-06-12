@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using FoodTracker.Api.Contracts;
 using FoodTracker.Api.Extensions;
 using FoodTracker.Application.DTOs;
@@ -6,7 +5,9 @@ using FoodTracker.Application.Features.Nutrition;
 using FoodTracker.Domain.Common.Results;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace FoodTracker.Api.Controllers.Api;
 
@@ -26,7 +27,6 @@ public class FoodsController : ControllerBase
     [Authorize(Roles = "admin, user")]
     [ProducesResponseType(typeof(PagedList<ShortFoodItemDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> Catalog([FromBody] FoodCatalogRequest request, CancellationToken cancellationToken)
     {
         if (request.Page < 1)
@@ -53,6 +53,19 @@ public class FoodsController : ControllerBase
         var result = await _mediator
             .Send(listFoodCatalogQuery, cancellationToken)
             .ConfigureAwait(false);
+
+        return result.ToActionResult(Ok);
+    }
+
+    [HttpGet("categories")]
+    [Authorize(Roles = "admin, user")]
+    [ProducesResponseType(typeof(IReadOnlyList<FoodCategoryWithItemsCountDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> Categories(CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(
+            new ListFoodCategoriesQuery(),
+            cancellationToken);
 
         return result.ToActionResult(Ok);
     }

@@ -1,5 +1,6 @@
 using FoodTracker.Application.Abstractions;
 using FoodTracker.Application.Abstractions.Persistence;
+using FoodTracker.Application.DTOs;
 using FoodTracker.Domain.Nutrition;
 
 using Microsoft.EntityFrameworkCore;
@@ -78,7 +79,7 @@ public class FoodItemRepository : IFoodItemRepository
             .ConfigureAwait(false);
     }
 
-    public async Task<PagedQueryResult<FoodItem>> ListCatalogAsync(IReadOnlyList<Guid> categoryIds, 
+    public async Task<PagedQueryResult<FoodItem>> ListCatalogAsync(IReadOnlyList<Guid> categoryIds,
                                                                    string? query,
                                                                    string? sortBy,
                                                                    bool sortDescending,
@@ -181,4 +182,21 @@ public class FoodItemRepository : IFoodItemRepository
     }
 
     private static string EscapeLike(string value) => value.Replace("\\", "\\\\", StringComparison.Ordinal).Replace("%", "\\%", StringComparison.Ordinal).Replace("_", "\\_", StringComparison.Ordinal);
+
+    public async Task<IReadOnlyList<FoodCategoryWithItemsCountDto>> ListCategoriesWithItemsCountAsync(CancellationToken cancellationToken)
+    {
+        return await _dataContext.FoodCategories
+           .AsNoTracking()
+           .Select(category => new FoodCategoryWithItemsCountDto
+           {
+               Id = category.Id,
+               Name = category.Name,
+               FoodItemsCount = category.FoodItemCategories
+                   .Select(x => x.FoodItemId)
+                   .Distinct()
+                   .Count()
+           })
+           .OrderBy(x => x.Name)
+           .ToListAsync(cancellationToken);
+    }
 }
