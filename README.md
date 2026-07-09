@@ -4,17 +4,8 @@
 
 FoodTracker is a full-stack application for tracking nutrition, physical activity, and health related metrics. The project includes a modern web frontend, a REST API backend, and supporting services built with a production-oriented approach.
 
-## Features
-
-- Physical activities catalog and search
-- Physical activity tracking
-- Food catalog and search
-- Food diary and calorie tracking
-
 ## Roadmap
 
-- Telegram Bot
-- Admin Panel
 
 ## Project Backlog
 
