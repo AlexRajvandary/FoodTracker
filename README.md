@@ -25,5 +25,5 @@ FoodTracker is a full-stack application for tracking nutrition, physical activit
 | Food Diary | Planned | [View](docs/epics/epic-03-food-diary.md) |
 | Activity Catalog | Planned | [View](docs/epics/epic-04-activity-catalog.md) |
 | Activity Tracking | Planned | [View](docs/epics/epic-05-activity-tracking.md) |
-| Reports | Planned | [View](docs/epics/epic-06-reports.md) |
+| User Profile and Goals| Planned | [View](docs/epics/epic-06-user-profile.md) |
 | Telegram Bot | Planned | [View](docs/epics/epic-07-telegram-bot.md) |
