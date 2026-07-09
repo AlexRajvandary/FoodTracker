@@ -134,7 +134,5 @@ Planned
 
 ## Notes
 
-## Notes
-
 - Idea: Allow users to submit custom food products for review. Once approved, the product becomes public and is available to all users. The original contributor should receive a notification when their product is approved.
 - Consider introducing a contribution rewards program (e.g., badges, points, achievements, or leaderboard) to encourage users to enrich the food catalog.
